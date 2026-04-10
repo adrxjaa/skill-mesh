@@ -19,7 +19,7 @@ function Home() {
   const titleStyle = {
     fontSize: "3rem",
     fontWeight: "bold",
-    color: "#0f172a",
+    color: "#f980ff",
     marginBottom: "1rem"
   };
 
@@ -46,13 +46,13 @@ function Home() {
     cursor: "pointer",
     textDecoration: "none",
     color: "white",
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#ff59cd",
     transition: "background-color 0.3s ease"
   };
 
   const secondaryButtonStyle = {
     ...buttonStyle,
-    backgroundColor: "#1e293b"
+    backgroundColor: "#ff96fd"
   };
 
   return (

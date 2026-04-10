@@ -7,7 +7,7 @@ function Login() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Login attempted with:", { email, password });
-    // No backend logic - just log the form data
+  
   };
 
   const containerStyle = {
@@ -60,7 +60,7 @@ function Login() {
   const buttonStyle = {
     width: "100%",
     padding: "0.75rem",
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#f63bc1",
     color: "white",
     border: "none",
     borderRadius: "0.375rem",

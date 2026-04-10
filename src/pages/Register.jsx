@@ -61,7 +61,7 @@ function Register() {
   const buttonStyle = {
     width: "100%",
     padding: "0.75rem",
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#f63bc1",
     color: "white",
     border: "none",
     borderRadius: "0.375rem",
