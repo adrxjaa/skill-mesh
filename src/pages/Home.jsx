@@ -1,70 +1,29 @@
 import { Link } from "react-router-dom";
 
 function Home() {
-  const containerStyle = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "calc(100vh - 80px)",
-    backgroundColor: "#f8fafc",
-    padding: "2rem"
-  };
-
-  const contentStyle = {
-    textAlign: "center",
-    maxWidth: "600px"
-  };
-
-  const titleStyle = {
-    fontSize: "3rem",
-    fontWeight: "bold",
-    color: "#f980ff",
-    marginBottom: "1rem"
-  };
-
-  const descriptionStyle = {
-    fontSize: "1.25rem",
-    color: "#475569",
-    marginBottom: "2rem",
-    lineHeight: "1.6"
-  };
-
-  const buttonContainerStyle = {
-    display: "flex",
-    gap: "1rem",
-    justifyContent: "center",
-    flexWrap: "wrap"
-  };
-
-  const buttonStyle = {
-    padding: "0.75rem 2rem",
-    fontSize: "1rem",
-    fontWeight: "600",
-    border: "none",
-    borderRadius: "0.5rem",
-    cursor: "pointer",
-    textDecoration: "none",
-    color: "white",
-    backgroundColor: "#ff59cd",
-    transition: "background-color 0.3s ease"
-  };
-
-  const secondaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#ff96fd"
-  };
-
   return (
-    <div style={containerStyle}>
-      <div style={contentStyle}>
-        <h1 style={titleStyle}>Welcome to SkillMesh</h1>
-        <p style={descriptionStyle}>Find teammates based on skills</p>
-        <div style={buttonContainerStyle}>
-          <Link to="/login" style={buttonStyle}>
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
+      <div className="text-center max-w-2xl">
+        <h1 className="text-5xl font-semibold text-slate-900 mb-4">
+          SkillMesh
+        </h1>
+
+        <p className="text-lg text-slate-600 mb-8">
+          Find teammates based on skills and build amazing projects together
+        </p>
+
+        <div className="flex justify-center gap-4">
+          <Link
+            to="/login"
+            className="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors duration-200"
+          >
             Login
           </Link>
-          <Link to="/register" style={secondaryButtonStyle}>
+
+          <Link
+            to="/register"
+            className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg font-medium hover:bg-slate-100 transition-colors duration-200"
+          >
             Register
           </Link>
         </div>

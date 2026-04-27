@@ -1,57 +1,24 @@
-
 import { Link } from "react-router-dom";
 
 function Navbar() {
-  const navStyle = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: "1rem 2rem",
-    backgroundColor: "#46052e",
-    boxShadow: "0 2px 4px rgba(234, 13, 13, 0.1)",
-    borderBottom: "2px solid #f18ed9"
-  };
-
-  const logoStyle = {
-    fontSize: "1.5rem",
-    fontWeight: "bold",
-    color: "#ff13a8",
-    margin: 0,
-    textDecoration: "none"
-  };
-
-  const linksContainerStyle = {
-    display: "flex",
-    gap: "2rem",
-    alignItems: "center"
-  };
-
-  const linkStyle = {
-    color: "#e5e7eb",
-    textDecoration: "none",
-    fontSize: "1rem",
-    fontWeight: "500",
-    transition: "color 0.3s ease",
-    cursor: "pointer"
-  };
-
-  const linkHoverStyle = {
-    ...linkStyle,
-    color: "#e646ff"
-  };
-
   return (
-    <nav style={navStyle}>
-      <h2 style={logoStyle}>SkillMesh</h2>
-      <div style={linksContainerStyle}>
-        <Link to="/" style={linkStyle} onMouseEnter={(e) => e.target.style.color = "#f63bc1"} onMouseLeave={(e) => e.target.style.color = "#e5e7eb"}>
+    <nav className="sticky top-0 z-50 bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center shadow-sm">
+      <Link to="/" className="text-xl font-semibold text-slate-900 hover:text-slate-700 transition-colors">
+        SkillMesh
+      </Link>
+
+      <div className="flex gap-8 items-center">
+        <Link to="/" className="text-slate-600 hover:text-slate-900 transition-colors duration-200">
           Home
         </Link>
-        <Link to="/login" style={linkStyle} onMouseEnter={(e) => e.target.style.color = "#f63bc1"} onMouseLeave={(e) => e.target.style.color = "#e5e7eb"}>
-          Login
+        <Link to="/dashboard" className="text-slate-600 hover:text-slate-900 transition-colors duration-200">
+          Dashboard
         </Link>
-        <Link to="/register" style={linkStyle} onMouseEnter={(e) => e.target.style.color = "#f63bc1"} onMouseLeave={(e) => e.target.style.color = "#e5e7eb"}>
-          Register
+        <Link to="/profile" className="text-slate-600 hover:text-slate-900 transition-colors duration-200">
+          Profile
+        </Link>
+        <Link to="/login" className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 font-medium">
+          Login
         </Link>
       </div>
     </nav>

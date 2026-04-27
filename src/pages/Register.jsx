@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 function Register() {
   const [name, setName] = useState("");
@@ -7,124 +8,75 @@ function Register() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Registration attempted with:", { name, email, password });
-    // No backend logic - just log the form data
-  };
-
-  const containerStyle = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: "calc(100vh - 80px)",
-    backgroundColor: "#f8fafc",
-    padding: "2rem"
-  };
-
-  const formContainerStyle = {
-    backgroundColor: "white",
-    padding: "2.5rem",
-    borderRadius: "0.5rem",
-    boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-    width: "100%",
-    maxWidth: "400px"
-  };
-
-  const titleStyle = {
-    fontSize: "2rem",
-    fontWeight: "bold",
-    marginBottom: "1.5rem",
-    color: "#0f172a",
-    textAlign: "center"
-  };
-
-  const formGroupStyle = {
-    marginBottom: "1.5rem"
-  };
-
-  const labelStyle = {
-    display: "block",
-    marginBottom: "0.5rem",
-    fontWeight: "600",
-    color: "#1e293b"
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "0.75rem",
-    border: "1px solid #cbd5e1",
-    borderRadius: "0.375rem",
-    fontSize: "1rem",
-    boxSizing: "border-box",
-    transition: "border-color 0.3s ease"
-  };
-
-  const buttonStyle = {
-    width: "100%",
-    padding: "0.75rem",
-    backgroundColor: "#f63bc1",
-    color: "white",
-    border: "none",
-    borderRadius: "0.375rem",
-    fontSize: "1rem",
-    fontWeight: "600",
-    cursor: "pointer",
-    transition: "background-color 0.3s ease"
+    console.log({ name, email, password });
   };
 
   return (
-    <div style={containerStyle}>
-      <div style={formContainerStyle}>
-        <h2 style={titleStyle}>Register</h2>
-        <form onSubmit={handleSubmit}>
-          <div style={formGroupStyle}>
-            <label htmlFor="name" style={labelStyle}>
-              Name
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4 py-8">
+      <div className="bg-white p-8 rounded-2xl shadow-sm w-full max-w-md border border-slate-200">
+        
+        <h2 className="text-2xl font-semibold text-slate-900 text-center mb-8">
+          Create Account
+        </h2>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          <div>
+            <label className="block text-slate-700 mb-2 font-medium text-sm">
+              Full Name
             </label>
             <input
-              id="name"
               type="text"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={inputStyle}
-              placeholder="Enter your name"
+              placeholder="John Doe"
               required
             />
           </div>
 
-          <div style={formGroupStyle}>
-            <label htmlFor="email" style={labelStyle}>
+          <div>
+            <label className="block text-slate-700 mb-2 font-medium text-sm">
               Email
             </label>
             <input
-              id="email"
               type="email"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
-              placeholder="Enter your email"
+              placeholder="you@example.com"
               required
             />
           </div>
 
-          <div style={formGroupStyle}>
-            <label htmlFor="password" style={labelStyle}>
+          <div>
+            <label className="block text-slate-700 mb-2 font-medium text-sm">
               Password
             </label>
             <input
-              id="password"
               type="password"
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400 transition-all"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={inputStyle}
-              placeholder="Enter your password"
+              placeholder="••••••••"
               required
             />
           </div>
 
-          <button type="submit" style={buttonStyle}>
-            Register
+          <button
+            type="submit"
+            className="w-full px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-medium transition-colors duration-200"
+          >
+            Create Account
           </button>
         </form>
+
+        <p className="text-center text-slate-600 text-sm mt-6">
+          Already have an account?{" "}
+          <Link to="/login" className="text-orange-500 hover:text-orange-600 font-medium">
+            Sign in
+          </Link>
+        </p>
       </div>
     </div>
   );
