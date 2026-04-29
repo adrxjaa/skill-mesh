@@ -1,4 +1,4 @@
-import ProfileCard from "../components/Profilecard";
+import ProfileCard from "../components/common/Profilecard";
 
 function Dashboard() {
   // TEMP FAKE DATA (replace later with API)
