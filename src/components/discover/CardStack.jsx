@@ -1,30 +1,42 @@
 import { useState, useCallback, useRef } from "react";
 import SwipeCard from "./SwipeCard";
+import useMatch from "../../hooks/useMatch";
 
 /**
  * CardStack — Manages the deck of SwipeCards.
  *
  * Props:
- *   users – array of user objects
+ *   users           – array of user objects to show
+ *   onSwipeResult   – optional callback({ matched, user, direction })
+ *   emptyTitle      – custom title for empty state
+ *   emptySubtitle   – custom subtitle for empty state
  */
-function CardStack({ users }) {
+function CardStack({ users, onSwipeResult, emptyTitle, emptySubtitle }) {
+  const { swipe } = useMatch();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [swipedUsers, setSwipedUsers] = useState([]); // { user, direction }
+  const [swipedCount, setSwipedCount] = useState({ right: 0, left: 0 });
   const topCardRef = useRef(null);
 
   const handleSwipe = useCallback(
     (direction) => {
-      const swipedUser = users[currentIndex];
-      setSwipedUsers((prev) => [...prev, { user: swipedUser, direction }]);
+      const currentUser = users[currentIndex];
+      if (!currentUser) return;
+
+      // Record the swipe in MatchContext
+      const result = swipe(currentUser.id, direction);
+
+      setSwipedCount((prev) => ({
+        ...prev,
+        [direction]: prev[direction] + 1,
+      }));
       setCurrentIndex((prev) => prev + 1);
+
+      // Notify parent (e.g. for showing the match modal)
+      onSwipeResult?.({ ...result, direction, user: currentUser });
     },
-    [currentIndex, users]
+    [currentIndex, users, swipe, onSwipeResult]
   );
 
-  /**
-   * Called by ActionButtons to trigger a swipe programmatically.
-   * We simulate this by directly calling handleSwipe after a brief animation.
-   */
   const triggerSwipe = useCallback(
     (direction) => {
       if (currentIndex >= users.length) return;
@@ -33,45 +45,34 @@ function CardStack({ users }) {
     [currentIndex, users.length, handleSwipe]
   );
 
-  const resetStack = () => {
-    setCurrentIndex(0);
-    setSwipedUsers([]);
-  };
-
   /* How many cards are left */
   const remaining = users.length - currentIndex;
 
   /* Show at most 3 stacked cards */
   const visibleCards = users.slice(currentIndex, currentIndex + 3);
 
-  if (remaining <= 0) {
+  if (users.length === 0 || remaining <= 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-orange-100 text-4xl">
-          🎉
+          {users.length === 0 ? "👀" : "🎉"}
         </div>
-        <h3 className="text-2xl font-bold text-slate-900">You've seen everyone!</h3>
+        <h3 className="text-2xl font-bold text-slate-900">
+          {emptyTitle || (users.length === 0 ? "No profiles here yet" : "You've seen everyone!")}
+        </h3>
         <p className="mt-2 max-w-sm text-sm text-slate-500">
-          You swiped through {users.length} profiles. Come back later for new teammates, or review your connections.
+          {emptySubtitle ||
+            (users.length === 0
+              ? "Check back later for new people."
+              : `You reviewed ${users.length} profiles. Come back later for new teammates.`)}
         </p>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <p className="text-xs text-slate-400">
+        {users.length > 0 && (
+          <p className="mt-4 text-xs text-slate-400">
             Connected with{" "}
-            <span className="font-semibold text-emerald-600">
-              {swipedUsers.filter((s) => s.direction === "right").length}
-            </span>{" "}
-            · Skipped{" "}
-            <span className="font-semibold text-red-500">
-              {swipedUsers.filter((s) => s.direction === "left").length}
-            </span>
+            <span className="font-semibold text-emerald-600">{swipedCount.right}</span> · Skipped{" "}
+            <span className="font-semibold text-red-500">{swipedCount.left}</span>
           </p>
-        </div>
-        <button
-          onClick={resetStack}
-          className="mt-6 rounded-full bg-orange-500 px-6 py-2.5 text-sm font-semibold text-white transition hover:bg-orange-600 active:scale-95"
-        >
-          Start over
-        </button>
+        )}
       </div>
     );
   }
@@ -97,7 +98,7 @@ function CardStack({ users }) {
               ref={i === 0 ? topCardRef : undefined}
             />
           ))
-          .reverse()  /* Render bottom cards first so top card is last in DOM (highest z) */}
+          .reverse()}
       </div>
 
       {/* ── Action buttons ── */}

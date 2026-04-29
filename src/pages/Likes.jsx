@@ -4,12 +4,12 @@ import MatchModal from "../components/discover/MatchModal";
 import useMatch from "../hooks/useMatch";
 import useAuth from "../hooks/useAuth";
 
-function Dashboard() {
-  const { getDiscoverUsers, clearLatestMatch, latestMatch } = useMatch();
+function Likes() {
+  const { getUnseenLikes, clearLatestMatch } = useMatch();
   const { user } = useAuth();
   const [matchedUser, setMatchedUser] = useState(null);
 
-  const discoverUsers = getDiscoverUsers();
+  const unseenLikes = getUnseenLikes();
 
   const handleSwipeResult = (result) => {
     if (result.matched && result.user) {
@@ -27,23 +27,31 @@ function Dashboard() {
       <div className="mx-auto max-w-2xl">
         {/* Header */}
         <div className="mb-8 text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-orange-500">
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-pink-500">
             SkillMesh
           </p>
           <h1 className="mt-2 text-3xl font-bold text-slate-900 sm:text-4xl">
-            Discover Teammates
+            People Who Like You
           </h1>
           <p className="mt-2 text-sm text-slate-500">
-            Swipe right to connect, left to skip. Find your next collaborator.
+            These people already swiped right on your profile. Swipe right to match instantly!
           </p>
+          {unseenLikes.length > 0 && (
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-pink-50 px-4 py-1.5 text-sm font-medium text-pink-600">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white">
+                {unseenLikes.length}
+              </span>
+              pending {unseenLikes.length === 1 ? "like" : "likes"}
+            </div>
+          )}
         </div>
 
-        {/* Swipe card stack */}
+        {/* Swipe card stack — only unseen likes */}
         <CardStack
-          users={discoverUsers}
+          users={unseenLikes}
           onSwipeResult={handleSwipeResult}
-          emptyTitle="You've seen everyone!"
-          emptySubtitle="Check back later for new profiles, or visit your Matches to start chatting."
+          emptyTitle="No pending likes"
+          emptySubtitle="Keep discovering teammates — when someone likes your profile, they'll show up here."
         />
       </div>
 
@@ -59,4 +67,4 @@ function Dashboard() {
   );
 }
 
-export default Dashboard;
+export default Likes;

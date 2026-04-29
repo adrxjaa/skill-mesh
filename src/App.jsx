@@ -10,6 +10,10 @@ import Profile from "./pages/Profile";
 import PublicProfile from "./pages/PublicProfile";
 import Admin from "./pages/Admin";
 import Requests from "./pages/Requests";
+import Likes from "./pages/Likes";
+import Matches from "./pages/Matches";
+import Chat from "./pages/Chat";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -26,6 +30,10 @@ function App() {
           <Route path="/u/:username" element={<PublicProfile />} />
           <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
           <Route path="/requests" element={<ProtectedRoute><Requests /></ProtectedRoute>} />
+          <Route path="/likes" element={<ProtectedRoute><Likes /></ProtectedRoute>} />
+          <Route path="/matches" element={<ProtectedRoute><Matches /></ProtectedRoute>} />
+          <Route path="/chat/:userId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         </Routes>
       </div>
     </BrowserRouter>

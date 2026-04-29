@@ -1,6 +1,14 @@
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 function Home() {
+  const { isAuthenticated } = useAuth();
+
+  // Authenticated users go straight to Discover
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center px-6">
       <div className="text-center max-w-2xl">
