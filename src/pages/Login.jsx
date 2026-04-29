@@ -7,7 +7,7 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { login } = useAuth();
+  const { login, loginAsDemo } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -24,6 +24,12 @@ function Login() {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDemoLogin = () => {
+    loginAsDemo();
+    toast.success("Logged in as demo user!");
+    navigate("/dashboard");
   };
 
   return (
@@ -72,6 +78,21 @@ function Login() {
             {submitting ? "Signing in…" : "Sign In"}
           </button>
         </form>
+
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-6">
+          <div className="flex-1 h-px bg-slate-200" />
+          <span className="text-xs text-slate-400 uppercase tracking-wider">or</span>
+          <div className="flex-1 h-px bg-slate-200" />
+        </div>
+
+        {/* Demo login bypass */}
+        <button
+          onClick={handleDemoLogin}
+          className="w-full px-4 py-2 border-2 border-dashed border-slate-300 text-slate-600 rounded-lg font-medium transition-all duration-200 hover:border-orange-400 hover:text-orange-600 hover:bg-orange-50"
+        >
+          Continue as Demo User
+        </button>
 
         <p className="text-center text-slate-600 text-sm mt-6">
           Don't have an account?{" "}

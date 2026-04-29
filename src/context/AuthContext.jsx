@@ -13,6 +13,25 @@ export function AuthProvider({ children }) {
     const restoreSession = async () => {
       const savedToken = localStorage.getItem("token");
       if (savedToken) {
+        // Demo token — restore the demo user without calling the API
+        if (savedToken === "demo-token-skillmesh") {
+          setUser({
+            _id: "demo-user-001",
+            displayName: "Ananya Bhat",
+            username: "ananyabuilds",
+            email: "ananya@demo.skillmesh",
+            role: "user",
+            avatar: "",
+            bio: "Frontend developer helping founders shape polished product experiences.",
+            location: "Bengaluru, India",
+            skills: ["React", "CSS", "Figma", "TypeScript", "Tailwind CSS"],
+            availability: "open-to-work",
+          });
+          setToken(savedToken);
+          setLoading(false);
+          return;
+        }
+
         try {
           const res = await api.get("/auth/me", {
             headers: { Authorization: `Bearer ${savedToken}` },
@@ -60,6 +79,27 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // Demo login — bypasses the API so the app works without a backend
+  const loginAsDemo = () => {
+    const demoToken = "demo-token-skillmesh";
+    const demoUser = {
+      _id: "demo-user-001",
+      displayName: "Ananya Bhat",
+      username: "ananyabuilds",
+      email: "ananya@demo.skillmesh",
+      role: "user",
+      avatar: "",
+      bio: "Frontend developer helping founders shape polished product experiences.",
+      location: "Bengaluru, India",
+      skills: ["React", "CSS", "Figma", "TypeScript", "Tailwind CSS"],
+      availability: "open-to-work",
+    };
+    localStorage.setItem("token", demoToken);
+    setToken(demoToken);
+    setUser(demoUser);
+    return demoUser;
+  };
+
   const value = {
     user,
     token,
@@ -68,6 +108,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     logout,
+    loginAsDemo,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
