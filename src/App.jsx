@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
@@ -13,10 +13,28 @@ import WriteReview from "./pages/WriteReview";
 import Chat from "./pages/Chat";
 import SearchResults from "./pages/SearchResults";
 import Settings from "./pages/Settings";
+import { FeedProvider } from "./context/FeedContext";
 
-function App() {
+/**
+ * Inner layout component that has access to useLocation()
+ * so we can conditionally hide the Footer on dashboard-style pages.
+ */
+function AppLayout() {
+  const { pathname } = useLocation();
+
+  // Pages that use the dashboard layout (sidebar + custom header) don't need the global Footer
+  const isDashboardPage = [
+    "/dashboard",
+    "/search",
+    "/messages",
+    "/profile",
+    "/profile-editor",
+    "/settings",
+    "/write-review",
+  ].some((p) => pathname.startsWith(p));
+
   return (
-    <BrowserRouter>
+    <>
       <Navbar />
       <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
       <div>
@@ -33,7 +51,17 @@ function App() {
           <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
         </Routes>
       </div>
-      <Footer />
+      {!isDashboardPage && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <FeedProvider>
+        <AppLayout />
+      </FeedProvider>
     </BrowserRouter>
   );
 }
