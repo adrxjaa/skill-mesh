@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback } from "react";
+import ReviewsSection from "../profile/ReviewsSection";
 
 /**
  * Availability badge colours keyed by the schema enum.
@@ -250,6 +251,9 @@ function SwipeCard({ user, onSwipe, isTop = false, stackIndex = 0 }) {
               </div>
             </div>
           )}
+
+          {/* ── Reviews (compact) ── */}
+          <ReviewsSection reviews={user.reviews} compact />
 
           {/* ── Social links ── */}
           {user.socialLinks && Object.values(user.socialLinks).some(Boolean) && (

@@ -3,15 +3,21 @@ import BasicProfile from "../components/profile/BasicProfile";
 import BioLinks from "../components/profile/BioLinks";
 import PostsAnalytics from "../components/profile/PostsAnalytics";
 import ExperienceSection from "../components/profile/ExperienceSection";
+import ReviewsSection from "../components/profile/ReviewsSection";
+import mockUsers from "../data/mockUsers";
 
 const sections = [
   { id: "basic", label: "Basic Profile" },
   { id: "bio", label: "Bio & Links" },
   { id: "posts", label: "Posts & Analytics" },
   { id: "experience", label: "Experience" },
+  { id: "reviews", label: "Reviews" },
 ];
 
 function renderSection(section) {
+  // Use the demo user's reviews (u1 = Ananya Bhat)
+  const demoUser = mockUsers.find((u) => u.id === "u1");
+
   switch (section) {
     case "basic":
       return <BasicProfile />;
@@ -21,6 +27,8 @@ function renderSection(section) {
       return <PostsAnalytics />;
     case "experience":
       return <ExperienceSection />;
+    case "reviews":
+      return <ReviewsSection reviews={demoUser?.reviews} />;
     default:
       return <ExperienceSection />;
   }

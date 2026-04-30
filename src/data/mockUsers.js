@@ -86,6 +86,35 @@ const mockUsers = [
         tag: "Open for collaboration",
       },
     ],
+    reviews: [
+      {
+        reviewerId: "u2",
+        reviewerName: "Rahul Menon",
+        reviewerInitials: "RM",
+        rating: 5,
+        text: "Ananya turned my rough API specs into a beautiful, intuitive frontend in under a week. Her eye for detail and speed of execution are remarkable.",
+        project: "Student Skill Exchange App",
+        date: "2025-11-15",
+      },
+      {
+        reviewerId: "u4",
+        reviewerName: "Arjun Krishnan",
+        reviewerInitials: "AK",
+        rating: 5,
+        text: "One of the best frontend developers I've collaborated with. She understood the design intent perfectly and added micro-interactions I hadn't even considered.",
+        project: "Portfolio Builder Tool",
+        date: "2025-08-22",
+      },
+      {
+        reviewerId: "u6",
+        reviewerName: "Karthik Nair",
+        reviewerInitials: "KN",
+        rating: 4,
+        text: "Great collaborator — responsive, communicative, and ships clean code. Would definitely work with her again on future projects.",
+        project: "CampusConnect UI Redesign",
+        date: "2025-06-10",
+      },
+    ],
   },
 
   {
@@ -142,6 +171,26 @@ const mockUsers = [
         description:
           "Happy to pair-program on backend projects and help with system design concepts.",
         tag: "Mentorship",
+      },
+    ],
+    reviews: [
+      {
+        reviewerId: "u1",
+        reviewerName: "Ananya Bhat",
+        reviewerInitials: "AB",
+        rating: 5,
+        text: "Rahul built the entire backend for our skill exchange app in record time. His API design is incredibly clean and well-documented.",
+        project: "Student Skill Exchange App",
+        date: "2025-12-01",
+      },
+      {
+        reviewerId: "u8",
+        reviewerName: "Siddharth Rao",
+        reviewerInitials: "SR",
+        rating: 4,
+        text: "Solid backend engineer who thinks about scalability from day one. Helped me optimise our deployment pipeline with well-structured API endpoints.",
+        project: "TaskFlow API",
+        date: "2025-09-18",
       },
     ],
   },
@@ -207,6 +256,26 @@ const mockUsers = [
     stats: { projects: 9, connections: 22, responseRate: 78 },
     openTo: ["ML projects", "Research collaboration", "Data pipelines", "Hackathons"],
     posts: [],
+    reviews: [
+      {
+        reviewerId: "u7",
+        reviewerName: "Divya Iyer",
+        reviewerInitials: "DI",
+        rating: 5,
+        text: "Neha's ML expertise is exceptional. She built a classification pipeline for our analytics project that exceeded all accuracy benchmarks.",
+        project: "Smart Expense Tracker",
+        date: "2025-10-05",
+      },
+      {
+        reviewerId: "u5",
+        reviewerName: "Priya Rajan",
+        reviewerInitials: "PR",
+        rating: 4,
+        text: "Knowledgeable and thorough. Neha explained complex ML concepts clearly and integrated them seamlessly into our React Native app.",
+        project: "Smart Expense Tracker",
+        date: "2025-07-20",
+      },
+    ],
   },
 
   {
@@ -277,6 +346,26 @@ const mockUsers = [
         tag: "Open for collaboration",
       },
     ],
+    reviews: [
+      {
+        reviewerId: "u1",
+        reviewerName: "Ananya Bhat",
+        reviewerInitials: "AB",
+        rating: 5,
+        text: "Arjun's design work is phenomenal. His wireframes were so detailed that implementation was seamless. A true design partner.",
+        project: "Portfolio Builder Tool",
+        date: "2025-09-12",
+      },
+      {
+        reviewerId: "u6",
+        reviewerName: "Karthik Nair",
+        reviewerInitials: "KN",
+        rating: 5,
+        text: "Working with Arjun on CampusConnect was a game-changer. His user research insights completely transformed our onboarding flow.",
+        project: "CampusConnect",
+        date: "2025-05-30",
+      },
+    ],
   },
 
   {
@@ -340,6 +429,17 @@ const mockUsers = [
     stats: { projects: 22, connections: 67, responseRate: 64 },
     openTo: ["Open source", "CLI tools", "Performance optimisation"],
     posts: [],
+    reviews: [
+      {
+        reviewerId: "u2",
+        reviewerName: "Rahul Menon",
+        reviewerInitials: "RM",
+        rating: 4,
+        text: "Priya's open source mindset is refreshing. She wrote clean, well-tested Rust code and her documentation was top-notch.",
+        project: "DevDash CLI",
+        date: "2025-11-02",
+      },
+    ],
   },
 
   {
@@ -396,6 +496,26 @@ const mockUsers = [
         description:
           "Looking for designers and backend developers to help scale CampusConnect to more universities.",
         tag: "Open for collaboration",
+      },
+    ],
+    reviews: [
+      {
+        reviewerId: "u4",
+        reviewerName: "Arjun Krishnan",
+        reviewerInitials: "AK",
+        rating: 5,
+        text: "Karthik is the fastest mobile developer I know. He shipped a polished React Native app from my Figma designs in just 2 weeks.",
+        project: "CampusConnect",
+        date: "2025-08-15",
+      },
+      {
+        reviewerId: "u1",
+        reviewerName: "Ananya Bhat",
+        reviewerInitials: "AB",
+        rating: 4,
+        text: "Smooth collaboration — Karthik handled all the mobile complexity while I focused on the web dashboard. Great communication throughout.",
+        project: "CampusConnect",
+        date: "2025-07-28",
       },
     ],
   },
@@ -456,6 +576,17 @@ const mockUsers = [
         tag: "Open for collaboration",
       },
     ],
+    reviews: [
+      {
+        reviewerId: "u3",
+        reviewerName: "Neha Sharma",
+        reviewerInitials: "NS",
+        rating: 5,
+        text: "Divya built an incredible data pipeline for our ML project. Her Spark expertise and attention to data quality saved us weeks of work.",
+        project: "Real-Time Sales Dashboard",
+        date: "2025-10-20",
+      },
+    ],
   },
 
   {
@@ -507,6 +638,26 @@ const mockUsers = [
     stats: { projects: 7, connections: 15, responseRate: 88 },
     openTo: ["DevOps consulting", "CI/CD setup", "Cloud architecture", "Infrastructure review"],
     posts: [],
+    reviews: [
+      {
+        reviewerId: "u2",
+        reviewerName: "Rahul Menon",
+        reviewerInitials: "RM",
+        rating: 5,
+        text: "Siddharth set up our entire CI/CD pipeline from scratch. Zero-downtime deployments and excellent monitoring. Couldn't ask for more.",
+        project: "TaskFlow API Deployment",
+        date: "2025-09-25",
+      },
+      {
+        reviewerId: "u5",
+        reviewerName: "Priya Rajan",
+        reviewerInitials: "PR",
+        rating: 4,
+        text: "Reliable infrastructure engineer. Siddharth helped containerise my Rust CLI tool and set up automated releases via GitHub Actions.",
+        project: "DevDash CLI",
+        date: "2025-08-10",
+      },
+    ],
   },
 ];
 
