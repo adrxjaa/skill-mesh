@@ -1,12 +1,16 @@
 function Navbar() {
   return (
-    <nav className="w-full border-b border-slate-800 bg-slate-950 text-slate-100">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded bg-slate-800" aria-hidden="true" />
-          <span className="text-sm uppercase tracking-[0.3em] text-slate-400">SkillMesh</span>
+    <nav className="w-full border-b border-surface-container-high bg-surface text-on-surface">
+      <div className="mx-auto flex h-12 max-w-[1280px] items-center justify-between px-5">
+        <div className="flex items-center gap-2">
+          <div className="h-5 w-5 rounded bg-surface-container-high" aria-hidden="true" />
+          <span className="text-sm font-semibold text-accent-orange-rich">SkillMesh</span>
         </div>
-        <div className="h-8 w-40 rounded bg-slate-900" aria-hidden="true" />
+
+        <div className="flex items-center gap-5">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-on-surface-variant">Log in</span>
+          <span className="rounded-sm bg-accent-orange-rich px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-white">Get started</span>
+        </div>
       </div>
     </nav>
   );
