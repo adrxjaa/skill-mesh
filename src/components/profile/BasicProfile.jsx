@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeaders } from "../common/Card";
-import { ChatIcon, ChartIcon } from "./ProfileIcons";
+import { ChartIcon } from "./ProfileIcons";
 
 function BasicProfile() {
   return (
@@ -24,10 +24,6 @@ function BasicProfile() {
             <div className="flex flex-wrap gap-3">
               <button className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50">
                 Edit photo
-              </button>
-              <button className="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800">
-                <ChatIcon className="h-4 w-4" />
-                Message profile
               </button>
             </div>
           </div>
@@ -56,63 +52,41 @@ function BasicProfile() {
             </label>
           </div>
 
-          <div className="mt-6 flex flex-wrap gap-3">
+          <div className="mt-6">
             <button className="rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-orange-600">
               Save profile
-            </button>
-            <button className="rounded-lg border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-              Preview public view
             </button>
           </div>
         </CardContent>
       </Card>
 
-      <div className="space-y-6">
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeaders className="justify-between">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Quick profile stats</h3>
-              <p className="text-sm text-slate-500">A compact view for visitors.</p>
-            </div>
-            <ChartIcon className="h-9 w-9 rounded-2xl bg-orange-50 p-2 text-orange-500" />
-          </CardHeaders>
-          <CardContent className="grid grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Projects</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-900">18</p>
-            </div>
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Connections</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-900">46</p>
-            </div>
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Response rate</p>
-              <p className="mt-2 text-2xl font-semibold text-slate-900">93%</p>
-            </div>
-            <div className="rounded-2xl bg-slate-50 p-4">
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Availability</p>
-              <p className="mt-2 text-2xl font-semibold text-emerald-600">Open</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-slate-200 bg-white shadow-sm">
-          <CardHeaders>
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">Change password</h3>
-              <p className="text-sm text-slate-500">Keep your account secure.</p>
-            </div>
-          </CardHeaders>
-          <CardContent className="space-y-4">
-            <input className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-orange-400" placeholder="Current password" type="password" />
-            <input className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-orange-400" placeholder="New password" type="password" />
-            <input className="w-full rounded-lg border border-slate-200 bg-white px-4 py-3 outline-none transition focus:border-orange-400" placeholder="Confirm new password" type="password" />
-            <button className="w-full rounded-lg bg-slate-900 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800">
-              Update password
-            </button>
-          </CardContent>
-        </Card>
-      </div>
+      <Card className="border border-slate-200 bg-white shadow-sm">
+        <CardHeaders className="justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">Quick profile stats</h3>
+            <p className="text-sm text-slate-500">A compact view for visitors.</p>
+          </div>
+          <ChartIcon className="h-9 w-9 rounded-2xl bg-orange-50 p-2 text-orange-500" />
+        </CardHeaders>
+        <CardContent className="grid grid-cols-2 gap-3">
+          <div className="rounded-2xl bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Projects</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-900">18</p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Connections</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-900">46</p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Response rate</p>
+            <p className="mt-2 text-2xl font-semibold text-slate-900">93%</p>
+          </div>
+          <div className="rounded-2xl bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Availability</p>
+            <p className="mt-2 text-2xl font-semibold text-emerald-600">Open</p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

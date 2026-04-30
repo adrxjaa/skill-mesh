@@ -76,23 +76,12 @@ function Profile() {
         </aside>
 
         <main className="space-y-6">
-          <div className="flex flex-col gap-4 border border-slate-200 bg-white p-6 shadow-sm sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm font-medium text-orange-500">Profile editor</p>
-              <h2 className="mt-2 text-3xl font-semibold text-slate-900">{activeItem?.label}</h2>
-              <p className="mt-2 max-w-2xl text-sm text-slate-500">
-                Build a profile that helps people understand your skills, current work, and the best way to reach you.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3">
-              <button className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                Save draft
-              </button>
-              <button className="rounded-full bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800">
-                Publish profile
-              </button>
-            </div>
+          <div className="border border-slate-200 bg-white p-6 shadow-sm">
+            <p className="text-sm font-medium text-orange-500">Profile editor</p>
+            <h2 className="mt-2 text-3xl font-semibold text-slate-900">{activeItem?.label}</h2>
+            <p className="mt-2 max-w-2xl text-sm text-slate-500">
+              Build a profile that helps people understand your skills, current work, and the best way to reach you.
+            </p>
           </div>
 
           {renderSection(activeSection)}

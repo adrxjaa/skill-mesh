@@ -2,15 +2,30 @@ import { useState, useRef, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import useMatch from "../hooks/useMatch";
 import mockUsers from "../data/mockUsers";
+import WriteReviewModal from "../components/profile/WriteReviewModal";
+import toast from "react-hot-toast";
 
 function Chat() {
   const { userId } = useParams();
-  const { isMatch, sendMessage, getMessages } = useMatch();
+  const {
+    isMatch,
+    sendMessage,
+    getMessages,
+    getCollaboration,
+    startCollaboration,
+    requestCompletion,
+    canReview,
+    writeReview,
+  } = useMatch();
   const [input, setInput] = useState("");
+  const [showCollabForm, setShowCollabForm] = useState(false);
+  const [projectName, setProjectName] = useState("");
+  const [showReviewModal, setShowReviewModal] = useState(false);
   const messagesEndRef = useRef(null);
 
   const matchedUser = mockUsers.find((u) => u.id === userId);
   const messages = getMessages(userId);
+  const collab = getCollaboration(userId);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -29,8 +44,46 @@ function Chat() {
     setInput("");
   };
 
+  const handleStartCollab = () => {
+    if (!projectName.trim()) {
+      toast.error("Enter a project name");
+      return;
+    }
+    startCollaboration(userId, projectName.trim());
+    setShowCollabForm(false);
+    setProjectName("");
+    toast.success("Collaboration started! 🚀");
+  };
+
+  const handleRequestCompletion = () => {
+    if (!collab) return;
+    requestCompletion(collab.id);
+    // Show appropriate message based on the current confirmedBy
+    // After this call, "me" is added, so check if the OTHER party already confirmed
+    const otherAlreadyConfirmed = collab.confirmedBy.includes(collab.userId);
+    toast.success(
+      otherAlreadyConfirmed
+        ? "Collaboration marked as complete! ✅"
+        : "Completion requested — the other party will be notified"
+    );
+  };
+
+  const handleSubmitReview = ({ rating, text }) => {
+    const result = writeReview(userId, { rating, text });
+    if (result.error) {
+      toast.error(result.error);
+    } else {
+      toast.success("Review submitted! It will be sent for approval. ✅");
+      setShowReviewModal(false);
+    }
+  };
+
+  // Determine collaboration status for the banner
+  const collabStatus = collab?.status;
+  const reviewable = canReview(userId);
+
   return (
-    <div className="flex h-[calc(100vh-65px)] flex-col bg-slate-50">
+    <div className="flex h-[calc(100vh-53px)] flex-col bg-slate-50">
       {/* ── Chat header ── */}
       <div className="flex items-center gap-4 border-b border-slate-200 bg-white px-4 py-3 shadow-sm sm:px-6">
         <Link
@@ -48,7 +101,7 @@ function Chat() {
           <h2 className="font-semibold text-slate-900">{matchedUser.displayName}</h2>
           <p className="truncate text-xs text-slate-500">{matchedUser.bio}</p>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex gap-2">
           <Link
             to={`/u/${matchedUser.username}`}
             className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
@@ -56,6 +109,99 @@ function Chat() {
             View Profile
           </Link>
         </div>
+      </div>
+
+      {/* ── Collaboration banner ── */}
+      <div className="border-b border-slate-200 bg-white px-4 py-2.5 sm:px-6">
+        {!collab && (
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-slate-500">
+              No active collaboration yet
+            </p>
+            <button
+              onClick={() => setShowCollabForm(!showCollabForm)}
+              className="rounded-lg bg-orange-500 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-orange-600 active:scale-95"
+            >
+              Start Collaboration
+            </button>
+          </div>
+        )}
+
+        {collab && collabStatus === "active" && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-500" />
+              <p className="text-xs font-medium text-slate-700">
+                Active: <span className="text-orange-600">{collab.projectName}</span>
+              </p>
+            </div>
+            <button
+              onClick={handleRequestCompletion}
+              className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100 active:scale-95"
+            >
+              Mark as Complete
+            </button>
+          </div>
+        )}
+
+        {collab && collabStatus === "pending-completion" && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+              <p className="text-xs font-medium text-slate-700">
+                Pending completion: <span className="text-orange-600">{collab.projectName}</span>
+              </p>
+            </div>
+            <span className="text-xs text-amber-600">Waiting for both parties to confirm…</span>
+          </div>
+        )}
+
+        {collab && collabStatus === "completed" && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-blue-500" />
+              <p className="text-xs font-medium text-slate-700">
+                Completed: <span className="text-orange-600">{collab.projectName}</span>
+              </p>
+            </div>
+            {reviewable ? (
+              <button
+                onClick={() => setShowReviewModal(true)}
+                className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-600 active:scale-95"
+              >
+                ⭐ Write a Review
+              </button>
+            ) : (
+              <span className="text-xs text-slate-400">Review submitted ✓</span>
+            )}
+          </div>
+        )}
+
+        {/* Start collaboration form */}
+        {showCollabForm && (
+          <div className="mt-2 flex gap-2">
+            <input
+              type="text"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="Project name (e.g. Student Skill Exchange App)"
+              className="flex-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs outline-none transition focus:border-orange-400 focus:bg-white"
+              onKeyDown={(e) => e.key === "Enter" && handleStartCollab()}
+            />
+            <button
+              onClick={handleStartCollab}
+              className="shrink-0 rounded-lg bg-slate-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-slate-800"
+            >
+              Start
+            </button>
+            <button
+              onClick={() => setShowCollabForm(false)}
+              className="shrink-0 rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-500 transition hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── Messages area ── */}
@@ -129,6 +275,16 @@ function Chat() {
           </button>
         </form>
       </div>
+
+      {/* ── Write Review Modal ── */}
+      {showReviewModal && collab && (
+        <WriteReviewModal
+          user={matchedUser}
+          projectName={collab.projectName}
+          onSubmit={handleSubmitReview}
+          onClose={() => setShowReviewModal(false)}
+        />
+      )}
     </div>
   );
 }

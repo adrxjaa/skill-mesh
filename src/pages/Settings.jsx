@@ -3,10 +3,12 @@ import { useNavigate, Link } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import useMatch from "../hooks/useMatch";
 import toast from "react-hot-toast";
+import mockUsers from "../data/mockUsers";
 
 const sections = [
   { id: "account", label: "Account Info" },
   { id: "password", label: "Change Password" },
+  { id: "reviews", label: "Review Requests" },
   { id: "notifications", label: "Notifications" },
   { id: "privacy", label: "Privacy" },
   { id: "data", label: "Data & Storage" },
@@ -16,8 +18,10 @@ const sections = [
 function Settings() {
   const [activeSection, setActiveSection] = useState("account");
   const { user, logout } = useAuth();
-  const { resetAll, matches } = useMatch();
+  const { resetAll, matches, getIncomingReviews, approveReview, flagReview, disputeReview, pendingReviewCount } = useMatch();
   const navigate = useNavigate();
+  const [disputeText, setDisputeText] = useState({});
+  const [showDisputeForm, setShowDisputeForm] = useState(null);
 
   // Notification toggles (mock — no backend)
   const [notifs, setNotifs] = useState({
@@ -75,6 +79,11 @@ function Settings() {
                   type="button"
                 >
                   {section.label}
+                  {section.id === "reviews" && pendingReviewCount > 0 && (
+                    <span className="ml-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white">
+                      {pendingReviewCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
@@ -150,6 +159,160 @@ function Settings() {
               </div>
             </div>
           )}
+
+          {/* ── Review Requests (Moderation Queue) ── */}
+          {activeSection === "reviews" && (() => {
+            const allReviews = getIncomingReviews();
+            const pending = allReviews.filter((r) => r.status === "pending");
+            const handled = allReviews.filter((r) => r.status !== "pending");
+
+            return (
+              <div className="space-y-6">
+                <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+                  <p className="text-sm text-slate-500 mb-4">
+                    Review what others have written about you. You control which reviews appear on your public profile.
+                  </p>
+
+                  {/* Info box */}
+                  <div className="rounded-lg bg-blue-50 px-4 py-3 text-xs text-blue-700">
+                    <p className="font-semibold">How moderation works</p>
+                    <ul className="mt-1 space-y-0.5 list-disc list-inside">
+                      <li><strong>Approve</strong> — Review becomes visible on your profile</li>
+                      <li><strong>Dispute</strong> — Your response is shown alongside the review</li>
+                      <li><strong>Flag</strong> — Review is hidden and sent to admin for investigation</li>
+                      <li>Reviews auto-approve after 7 days if no action is taken</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Pending reviews */}
+                {pending.length > 0 && (
+                  <div>
+                    <h3 className="mb-3 text-sm font-semibold text-slate-700">Pending ({pending.length})</h3>
+                    <div className="space-y-3">
+                      {pending.map((review) => {
+                        const reviewer = mockUsers.find((u) => u.id === review.reviewerId);
+                        return (
+                          <div key={review.id} className="rounded-lg border border-amber-200 bg-amber-50 p-5">
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange-100 text-sm font-bold text-orange-600">
+                                {review.reviewerInitials}
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-semibold text-slate-900">{review.reviewerName}</span>
+                                  <div className="flex gap-0.5">
+                                    {[1,2,3,4,5].map((s) => (
+                                      <svg key={s} className={`h-3.5 w-3.5 ${s <= review.rating ? 'text-amber-400' : 'text-slate-200'}`} viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                      </svg>
+                                    ))}
+                                  </div>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-0.5">on <span className="text-orange-600 font-medium">{review.projectName}</span></p>
+                                <p className="mt-2 text-sm text-slate-700 italic">"{review.text}"</p>
+
+                                {/* Actions */}
+                                <div className="mt-3 flex flex-wrap gap-2">
+                                  <button
+                                    onClick={() => { approveReview(review.id); toast.success('Review approved'); }}
+                                    className="rounded-lg bg-emerald-500 px-4 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-600 active:scale-95"
+                                  >
+                                    ✓ Approve
+                                  </button>
+                                  <button
+                                    onClick={() => setShowDisputeForm(showDisputeForm === review.id ? null : review.id)}
+                                    className="rounded-lg border border-amber-300 bg-amber-100 px-4 py-1.5 text-xs font-semibold text-amber-700 transition hover:bg-amber-200 active:scale-95"
+                                  >
+                                    💬 Dispute
+                                  </button>
+                                  <button
+                                    onClick={() => { flagReview(review.id); toast.success('Review flagged for admin review'); }}
+                                    className="rounded-lg border border-red-200 px-4 py-1.5 text-xs font-semibold text-red-600 transition hover:bg-red-50 active:scale-95"
+                                  >
+                                    🚩 Flag
+                                  </button>
+                                </div>
+
+                                {/* Dispute form */}
+                                {showDisputeForm === review.id && (
+                                  <div className="mt-3 space-y-2">
+                                    <textarea
+                                      value={disputeText[review.id] || ''}
+                                      onChange={(e) => setDisputeText((prev) => ({ ...prev, [review.id]: e.target.value }))}
+                                      placeholder="Write your response — this will be shown alongside the review on your profile"
+                                      rows={3}
+                                      className="w-full resize-none rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs outline-none focus:border-orange-400"
+                                    />
+                                    <button
+                                      onClick={() => {
+                                        if ((disputeText[review.id] || '').trim().length < 10) {
+                                          toast.error('Response must be at least 10 characters');
+                                          return;
+                                        }
+                                        disputeReview(review.id, disputeText[review.id]);
+                                        setShowDisputeForm(null);
+                                        toast.success('Dispute submitted with your response');
+                                      }}
+                                      className="rounded-lg bg-slate-900 px-4 py-1.5 text-xs font-medium text-white transition hover:bg-slate-800"
+                                    >
+                                      Submit Response
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Handled reviews */}
+                {handled.length > 0 && (
+                  <div>
+                    <h3 className="mb-3 text-sm font-semibold text-slate-700">Handled ({handled.length})</h3>
+                    <div className="space-y-3">
+                      {handled.map((review) => (
+                        <div key={review.id} className={`rounded-lg border p-4 ${
+                          review.status === 'approved' ? 'border-emerald-200 bg-emerald-50' :
+                          review.status === 'flagged' ? 'border-red-200 bg-red-50' :
+                          'border-amber-200 bg-amber-50'
+                        }`}>
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="font-medium text-slate-900 text-sm">{review.reviewerName}</span>
+                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                                review.status === 'approved' ? 'bg-emerald-200 text-emerald-700' :
+                                review.status === 'flagged' ? 'bg-red-200 text-red-700' :
+                                'bg-amber-200 text-amber-700'
+                              }`}>{review.status}</span>
+                            </div>
+                          </div>
+                          <p className="mt-1 text-xs text-slate-600 italic">"{review.text}"</p>
+                          {review.response && (
+                            <div className="mt-2 rounded-lg bg-white/50 px-3 py-2 text-xs">
+                              <p className="font-semibold text-slate-700">Your response:</p>
+                              <p className="text-slate-600 mt-0.5">{review.response}</p>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {allReviews.length === 0 && (
+                  <div className="flex flex-col items-center py-12 text-center">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100 text-2xl">⭐</div>
+                    <p className="font-medium text-slate-700">No review requests yet</p>
+                    <p className="mt-1 text-xs text-slate-500">When collaborators write reviews about you, they'll appear here for your approval.</p>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ── Notifications ── */}
           {activeSection === "notifications" && (
