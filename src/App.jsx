@@ -14,6 +14,7 @@ import Chat from "./pages/Chat";
 import SearchResults from "./pages/SearchResults";
 import Settings from "./pages/Settings";
 import { FeedProvider } from "./context/FeedContext";
+import { ProfileProvider } from "./context/ProfileContext";
 
 /**
  * Inner layout component that has access to useLocation()
@@ -60,7 +61,9 @@ function App() {
   return (
     <BrowserRouter>
       <FeedProvider>
-        <AppLayout />
+        <ProfileProvider>
+          <AppLayout />
+        </ProfileProvider>
       </FeedProvider>
     </BrowserRouter>
   );
