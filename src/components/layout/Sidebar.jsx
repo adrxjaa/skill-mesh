@@ -34,7 +34,7 @@ function Sidebar({ activeOverride }) {
   const currentPath = activeOverride || location.pathname;
 
   return (
-    <aside className="flex h-screen w-56 flex-col border-r border-surface-container-high bg-surface-container-lowest">
+    <aside className="flex shrink-0 overflow-y-auto w-56 flex-col border-r border-surface-container-high bg-surface-container-lowest">
       {/* Logo */}
       <div className="flex items-center gap-2.5 px-5 py-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white">

@@ -1,6 +1,6 @@
 function Navbar() {
   return (
-    <nav className="w-full border-b border-surface-container-high bg-surface text-on-surface">
+    <nav className="w-full sticky top-0 z-50 border-b border-surface-container-high bg-surface text-on-surface">
       <div className="flex h-14 items-center justify-between px-8 lg:px-12">
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 items-center justify-center rounded bg-surface-container-high" aria-hidden="true">

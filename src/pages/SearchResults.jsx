@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Search, X, Home, Users, MessageSquare, User, Settings, HelpCircle, Clock, Star } from 'lucide-react';
+import { useOutletContext } from "react-router-dom";
+import { Users, Clock } from "lucide-react";
 
 function SearchResults() {
-  const [searchQuery, setSearchQuery] = useState('Mobile app developer');
-  const [activeTab, setActiveTab] = useState('people');
+  const { searchQuery = "Mobile app developer" } = useOutletContext() || {};
+  const activeTab = "people";
   
   const mockResults = [
     {
@@ -57,212 +57,132 @@ function SearchResults() {
     '#CrossPlatform'
   ];
 
-  const navItems = [
-    { icon: Home, label: 'Feed', active: false },
-    { icon: Search, label: 'Search', active: true },
-    { icon: Users, label: 'Connections', active: false },
-    { icon: MessageSquare, label: 'Messages', active: false },
-    { icon: User, label: 'Profile', active: false }
-  ];
-
   return (
-    <div className="min-h-screen bg-dark-bg text-text-primary flex">
-      {/* Left Sidebar */}
-      <aside className="w-60 fixed left-0 top-16 bottom-0 bg-card-bg border-r border-border-color flex flex-col overflow-y-auto">
-        {/* Logo Section */}
-        <div className="p-6 border-b border-border-color">
-          <div className="text-2xl font-bold text-primary mb-1">SkillMesh</div>
-          <div className="text-xs text-text-secondary">Build Together</div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2">
-          {navItems.map((item) => (
-            <div
-              key={item.label}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg transition ${
-                item.active
-                  ? 'bg-primary text-black font-semibold'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
-              <item.icon size={20} />
-              <span className="text-sm">{item.label}</span>
-            </div>
-          ))}
-        </nav>
-
-        {/* Bottom Actions */}
-        <div className="p-4 border-t border-border-color space-y-3">
-          <button className="w-full bg-primary text-black font-bold py-2 rounded-lg hover:bg-primary-hover transition text-sm">
-            + Post Requirement
-          </button>
-          <div className="flex gap-3 text-text-secondary text-xs">
-            <button className="hover:text-text-primary transition">Settings</button>
-            <button className="hover:text-text-primary transition">Help</button>
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 ml-60 mr-72 border-r border-border-color">
-        {/* Search Bar */}
-        <div className="sticky top-16 bg-dark-bg border-b border-border-color p-4 z-10">
-          <div className="relative">
-            <Search className="absolute left-4 top-3.5 text-text-secondary" size={20} />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-input-bg border border-border-color rounded-lg px-4 py-3 pl-12 pr-12 text-text-primary placeholder-text-secondary outline-none focus:border-primary focus:ring-1 focus:ring-primary transition"
-              placeholder="Search for skills, roles, or profiles..."
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-4 top-3.5 text-text-secondary hover:text-text-primary"
-              >
-                <X size={20} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="border-b border-border-color px-6">
-          <div className="flex gap-8">
-            <button
-              onClick={() => setActiveTab('people')}
-              className={`py-4 font-medium transition ${
-                activeTab === 'people'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
+    <div className="flex h-full min-h-0 w-full bg-surface text-on-surface">
+      <main className="flex min-w-0 flex-1 flex-col border-r border-surface-container-high">
+        <div className="border-b border-surface-container-high px-6 pb-2 pt-5 lg:px-8">
+          <div className="flex gap-8 text-base font-semibold">
+            <button className="border-b-2 border-primary pb-3 text-text-primary">
               People
             </button>
-            <button
-              onClick={() => setActiveTab('posts')}
-              className={`py-4 font-medium transition ${
-                activeTab === 'posts'
-                  ? 'text-primary border-b-2 border-primary'
-                  : 'text-text-secondary hover:text-text-primary'
-              }`}
-            >
+            <button className="pb-3 text-text-secondary transition hover:text-text-primary">
               Posts
             </button>
           </div>
         </div>
 
-        {/* Results */}
-        <div className="p-6">
-          {activeTab === 'people' && (
-            <>
-              <p className="text-sm text-text-secondary mb-6">
-                Showing top matches for '<span className="text-text-primary font-semibold">{searchQuery}</span>'
-              </p>
+        <div className="flex-1 overflow-y-auto px-6 py-5 lg:px-8">
+          <p className="mb-5 text-sm text-text-secondary">
+            Showing top matches for <span className="text-text-primary font-semibold">&ldquo;{searchQuery}&rdquo;</span>
+          </p>
 
-              <div className="space-y-4">
-                {mockResults.map((result) => (
-                  <div key={result.id} className="bg-card-bg border border-border-color rounded-lg p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      {/* Avatar & Name */}
-                      <div className="flex items-start gap-4 flex-1">
-                        <div className="text-4xl">{result.avatar}</div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between gap-4">
-                            <h3 className="text-lg font-bold text-text-primary">{result.name}</h3>
-                            <div className="flex items-center gap-2">
-                              <div className="flex-1 h-2 bg-gradient-to-r from-primary to-primary-hover rounded-full" style={{ width: '80px' }} />
-                              <span className="text-sm font-bold text-primary">{result.matchPercentage}%</span>
-                            </div>
+          <div className="space-y-4">
+            {mockResults.map((result) => (
+              <article
+                key={result.id}
+                className="rounded-2xl border border-surface-container-high bg-surface-container-low/60 p-5 shadow-none transition-colors hover:border-outline-variant/70"
+              >
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                  <div className="flex min-w-0 items-start gap-4">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-surface-container-high to-surface-bright text-2xl">
+                      {result.avatar}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="min-w-0">
+                          <h3 className="truncate text-lg font-bold text-on-surface">
+                            {result.name}
+                          </h3>
+                          <p className="text-sm text-text-secondary">{result.title}</p>
+                        </div>
+                        <div className="flex min-w-22.5 items-center gap-2 pt-1 text-right">
+                          <div className="h-1.5 w-16 rounded-full bg-surface-container-high">
+                            <div
+                              className="h-1.5 rounded-full bg-primary"
+                              style={{ width: `${result.matchPercentage}%` }}
+                            />
                           </div>
-                          <p className="text-sm text-text-secondary mt-1">{result.title}</p>
-                          <p className="text-sm text-text-secondary mt-2 line-clamp-2">
-                            {result.description}
-                          </p>
+                          <span className="text-xs font-semibold text-primary">
+                            {result.matchPercentage}%
+                          </span>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Skills */}
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {result.skills.map((skill, idx) => (
-                        <div
-                          key={idx}
-                          className={`text-xs px-3 py-1 rounded-full border ${
-                            idx === 0
-                              ? 'bg-skill-tag border-primary text-primary'
-                              : 'bg-skill-tag border-border-color text-text-secondary'
-                          }`}
-                        >
-                          {skill}
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-3">
-                      {result.isPending ? (
-                        <button className="flex-1 bg-skill-tag text-text-secondary py-2 rounded-lg text-sm font-medium cursor-not-allowed opacity-50">
-                          Pending
-                        </button>
-                      ) : (
-                        <button className="flex-1 border border-primary text-primary py-2 rounded-lg text-sm font-medium hover:bg-primary hover:text-black transition">
-                          Connect
-                        </button>
-                      )}
-                      <button className="flex-1 text-text-secondary py-2 rounded-lg text-sm font-medium hover:text-text-primary transition">
-                        View Profile
-                      </button>
+                      <p className="mt-3 max-w-2xl text-sm leading-relaxed text-text-secondary">
+                        {result.description}
+                      </p>
                     </div>
                   </div>
-                ))}
-              </div>
-            </>
-          )}
 
-          {activeTab === 'posts' && (
-            <div className="text-center py-12">
-              <p className="text-text-secondary">No posts found matching '{searchQuery}'</p>
-            </div>
-          )}
+                  <div className="flex shrink-0 items-center justify-end gap-3 lg:pt-8">
+                    {result.isPending ? (
+                      <button className="rounded-xl border border-surface-container-high bg-surface-container px-5 py-2.5 text-sm font-medium text-text-secondary opacity-70">
+                        Pending
+                      </button>
+                    ) : (
+                      <button className="rounded-xl border border-primary px-5 py-2.5 text-sm font-medium text-primary transition hover:bg-primary hover:text-black">
+                        Connect
+                      </button>
+                    )}
+                    <button className="rounded-xl bg-surface-container px-5 py-2.5 text-sm font-medium text-text-primary transition hover:bg-surface-container-high">
+                      View Profile
+                    </button>
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {result.skills.map((skill, idx) => (
+                    <span
+                      key={skill}
+                      className={`rounded-full border px-3 py-1 text-xs font-medium ${
+                        idx === 0
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-surface-container-high bg-surface-container-low text-text-secondary"
+                      }`}
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       </main>
 
-      {/* Right Panel */}
-      <aside className="w-72 fixed right-0 top-16 bottom-0 bg-card-bg border-l border-border-color overflow-y-auto">
-        <div className="p-6 space-y-8">
-          {/* Recent Searches */}
-          <div>
-            <h3 className="text-sm font-bold text-text-primary mb-4 uppercase tracking-wider">Recent Searches</h3>
-            <div className="space-y-2">
-              {recentSearches.map((search, idx) => (
+      <aside className="hidden w-72.5 shrink-0 overflow-y-auto border-l border-surface-container-high bg-surface-container-lowest lg:block">
+        <div className="space-y-6 p-6">
+          <section className="rounded-xl border border-surface-container-high bg-surface-container-low/70 p-4">
+            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.35em] text-text-secondary">
+              Recent Searches
+            </h3>
+            <div className="space-y-1">
+              {recentSearches.map((search) => (
                 <button
-                  key={idx}
-                  className="w-full flex items-center gap-3 px-3 py-2 hover:bg-input-bg rounded-lg transition text-left"
+                  key={search}
+                  className="flex w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm text-text-secondary transition hover:bg-surface-container-high/50 hover:text-text-primary"
                 >
-                  <Clock size={16} className="text-text-secondary flex-shrink-0" />
-                  <span className="text-sm text-text-secondary hover:text-text-primary transition">{search}</span>
+                  <Clock size={14} className="shrink-0" />
+                  <span>{search}</span>
                 </button>
               ))}
             </div>
-          </div>
+          </section>
 
-          {/* Related Tags */}
-          <div>
-            <h3 className="text-sm font-bold text-text-primary mb-4 uppercase tracking-wider">Related Tags</h3>
+          <section className="rounded-xl border border-surface-container-high bg-surface-container-low/70 p-4">
+            <h3 className="mb-4 text-xs font-bold uppercase tracking-[0.35em] text-text-secondary">
+              Related Tags
+            </h3>
             <div className="flex flex-wrap gap-2">
-              {relatedTags.map((tag, idx) => (
+              {relatedTags.map((tag) => (
                 <button
-                  key={idx}
-                  className="px-3 py-1 bg-skill-tag border border-border-color rounded-full text-xs text-text-secondary hover:border-primary hover:text-primary transition"
+                  key={tag}
+                  className="rounded-full border border-surface-container-high px-3 py-1.5 text-xs text-text-secondary transition hover:border-primary hover:text-primary"
                 >
                   {tag}
                 </button>
               ))}
             </div>
-          </div>
+          </section>
         </div>
       </aside>
     </div>
