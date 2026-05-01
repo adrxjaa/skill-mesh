@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import ProtectedRoute from "./components/common/ProtectedRoute";
+import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -16,53 +17,52 @@ import Settings from "./pages/Settings";
 import { FeedProvider } from "./context/FeedContext";
 import { ProfileProvider } from "./context/ProfileContext";
 
-/**
- * Inner layout component that has access to useLocation()
- * so we can conditionally hide the Footer on dashboard-style pages.
- */
-function AppLayout() {
-  const { pathname } = useLocation();
-
-  // Pages that use the dashboard layout (sidebar + custom header) don't need the global Footer
-  const isDashboardPage = [
-    "/dashboard",
-    "/search",
-    "/messages",
-    "/profile",
-    "/profile-editor",
-    "/settings",
-    "/write-review",
-  ].some((p) => pathname.startsWith(p));
-
-  return (
-    <>
-      <Navbar />
-      <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
-      <div>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-          <Route path="/profile-editor" element={<ProtectedRoute><ProfileEditor /></ProtectedRoute>} />
-          <Route path="/write-review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
-          <Route path="/messages" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-          <Route path="/search" element={<ProtectedRoute><SearchResults /></ProtectedRoute>} />
-          <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        </Routes>
-      </div>
-      {!isDashboardPage && <Footer />}
-    </>
-  );
-}
-
 function App() {
+  function AppContent() {
+    const location = useLocation();
+    const isAuthRoute = [
+      "/dashboard",
+      "/profile",
+      "/profile-editor",
+      "/write-review",
+      "/messages",
+      "/search",
+      "/settings",
+    ].some(
+      (path) => location.pathname === path || location.pathname.startsWith(`${path}/`)
+    );
+
+    return (
+      <div className={isAuthRoute ? "min-h-screen bg-surface text-on-surface" : "min-h-screen flex flex-col"}>
+        {!isAuthRoute && <Navbar />}
+        <Toaster position="top-right" toastOptions={{ duration: 3000 }} />
+        <main className={isAuthRoute ? "min-h-screen" : "flex-1 flex flex-col min-h-0"}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            <Route element={<AuthenticatedLayout />}>
+              <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/profile-editor" element={<ProtectedRoute><ProfileEditor /></ProtectedRoute>} />
+              <Route path="/write-review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
+              <Route path="/messages" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+              <Route path="/search" element={<ProtectedRoute><SearchResults /></ProtectedRoute>} />
+              <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+            </Route>
+          </Routes>
+        </main>
+        {!isAuthRoute && <Footer />}
+      </div>
+    );
+  }
+
   return (
     <BrowserRouter>
       <FeedProvider>
         <ProfileProvider>
-          <AppLayout />
+          <AppContent />
         </ProfileProvider>
       </FeedProvider>
     </BrowserRouter>
