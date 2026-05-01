@@ -5,34 +5,13 @@ import { useAuth } from '../hooks/useAuth';
 
 function Login() {
   const navigate = useNavigate();
-  const { loginAsDemo, login } = useAuth();
+  const { loginAsDemo } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const handleDemoLogin = async () => {
-    setLoading(true);
-    try {
-      await loginAsDemo();
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Demo login failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await login(email, password);
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Login failed:', error);
-    } finally {
-      setLoading(false);
-    }
+  const handleDemoLogin = () => {
+    loginAsDemo();
+    navigate('/dashboard');
   };
 
   return (
@@ -68,7 +47,7 @@ function Login() {
             </p>
 
             {/* Form */}
-            <form onSubmit={handleLogin} className="space-y-5 mb-6">
+            <div className="space-y-5 mb-6">
               {/* Email */}
               <div>
                 <label className="text-xs font-bold uppercase tracking-wider text-text-primary mb-2 block">
@@ -107,27 +86,19 @@ function Login() {
                   />
                 </div>
               </div>
-
-              {/* Login Button */}
-              <button type="submit" disabled={loading} className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-primary-hover transition disabled:opacity-50 disabled:cursor-not-allowed">
-                {loading ? 'Logging in...' : 'Login'}
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="flex items-center gap-3 mb-6">
-              <div className="flex-1 h-px bg-border-color" />
-              <span className="text-xs text-text-secondary">OR</span>
-              <div className="flex-1 h-px bg-border-color" />
             </div>
+
+            {/* Login Button */}
+            <button className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-primary-hover transition mb-3">
+              Login
+            </button>
 
             {/* Demo Login Button */}
             <button
               onClick={handleDemoLogin}
-              disabled={loading}
-              className="w-full bg-skill-tag border border-primary text-primary font-bold py-3 rounded-lg hover:bg-primary hover:text-black transition disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+              className="w-full bg-skill-tag border border-primary text-primary font-bold py-3 rounded-lg hover:bg-primary hover:text-black transition mb-6"
             >
-              {loading ? 'Loading...' : 'Login as Demo User'}
+              Login as Demo User
             </button>
 
             {/* Sign Up Link */}
