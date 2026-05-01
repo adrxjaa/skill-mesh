@@ -1,18 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
-import { useAuth } from '../hooks/useAuth';
 
 function Login() {
-  const navigate = useNavigate();
-  const { loginAsDemo } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleDemoLogin = () => {
-    loginAsDemo();
-    navigate('/dashboard');
-  };
 
   return (
     <div className="min-h-screen bg-dark-bg text-text-primary flex flex-col">
@@ -89,16 +81,8 @@ function Login() {
             </div>
 
             {/* Login Button */}
-            <button className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-primary-hover transition mb-3">
+            <button className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-primary-hover transition mb-6">
               Login
-            </button>
-
-            {/* Demo Login Button */}
-            <button
-              onClick={handleDemoLogin}
-              className="w-full bg-skill-tag border border-primary text-primary font-bold py-3 rounded-lg hover:bg-primary hover:text-black transition mb-6"
-            >
-              Login as Demo User
             </button>
 
             {/* Sign Up Link */}
