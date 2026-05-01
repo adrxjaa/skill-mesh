@@ -78,25 +78,27 @@ function Navbar() {
 
   /* ── Default guest Navbar ── */
   return (
-    <nav className="w-full border-b border-surface-container-high bg-surface text-on-surface">
-      <div className="mx-auto flex h-12 max-w-[1280px] items-center justify-between px-5">
+    <nav className="w-full sticky top-0 z-50 border-b border-surface-container-high bg-surface text-on-surface">
+      <div className="flex h-14 items-center justify-between px-8 lg:px-12">
         <div className="flex items-center gap-2">
-          <div className="h-5 w-5 rounded bg-surface-container-high" aria-hidden="true" />
-          <Link to="/" className="text-sm font-semibold text-accent-orange-rich font-heading">
+          <div className="flex h-6 w-6 items-center justify-center rounded bg-surface-container-high" aria-hidden="true">
+            <div className="h-3 w-3 rounded-sm bg-primary" />
+          </div>
+          <Link to="/" className="text-base font-semibold text-primary font-heading">
             SkillMesh
           </Link>
         </div>
 
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4">
           <Link
             to="/login"
-            className="text-[10px] font-semibold uppercase tracking-[0.4em] text-on-surface-variant hover:text-text-primary transition-colors"
+            className="text-[11px] font-semibold uppercase tracking-[0.35em] text-on-surface-variant hover:text-text-primary transition-colors"
           >
             Log in
           </Link>
           <Link
             to="/register"
-            className="rounded-sm bg-accent-orange-rich px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-white hover:bg-accent-orange-rich/90 transition-colors"
+            className="rounded bg-primary px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.3em] text-white shadow-[0_0_0_1px_rgba(0,0,0,0.2)] hover:bg-accent-orange-rich/90 transition-colors"
           >
             Get started
           </Link>
