@@ -8,6 +8,7 @@ function RequirementPostCard({ post }) {
   const { toggleLike, toggleInterest, isLiked, hasInterest, deletePost } = useFeed();
   const [showComments, setShowComments] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleShare = async () => {
     const shareText = `${post.author.displayName}: ${post.title || ""} ${post.body}`;
@@ -58,7 +59,7 @@ function RequirementPostCard({ post }) {
         </span>
       </div>
 
-      {/* Author row + delete */}
+      {/* Author row */}
       <div className="flex gap-3 items-center mb-3">
         <div className="w-10 h-10 rounded-full bg-accent-orange-rich/20 flex items-center justify-center text-accent-orange-rich font-heading font-bold text-body-sm flex-shrink-0">
           {post.author.initials}
@@ -71,15 +72,30 @@ function RequirementPostCard({ post }) {
             {post.author.title} • {timeAgo(post.createdAt)}
           </p>
         </div>
-        {/* Delete button — own posts only */}
+        {/* ··· menu — own posts only */}
         {isOwnPost && (
-          <button
-            onClick={() => setShowDeleteConfirm(true)}
-            className="text-text-secondary hover:text-red-400 transition-colors p-1"
-            title="Delete post"
-          >
-            <span className="material-symbols-outlined text-[18px]">delete</span>
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setMenuOpen((o) => !o)}
+              className="text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-lg hover:bg-surface-container-high"
+            >
+              <span className="material-symbols-outlined text-[18px]">more_horiz</span>
+            </button>
+            {menuOpen && (
+              <>
+                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                <div className="absolute right-0 top-8 z-20 bg-surface-card border border-outline-variant rounded-xl shadow-xl overflow-hidden min-w-[140px]">
+                  <button
+                    onClick={() => { setMenuOpen(false); setShowDeleteConfirm(true); }}
+                    className="w-full flex items-center gap-2 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-colors font-body text-sm"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                    Delete post
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
 
