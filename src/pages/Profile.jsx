@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import AuthContext from "../context/AuthContext";
 import { getUserProfile, getMyProfile, getReviews, submitReview } from "../services/profileApi";
+import { getSuggestedTags } from "../services/discoverApi";
 import ConnectModal from "../components/projects/ConnectModal";
 import ProfilePosts from "../components/profile/ProfilePosts";
 
@@ -57,6 +58,11 @@ export default function Profile() {
   const [cardSkillInput, setCardSkillInput] = useState("");
   const [savingCard, setSavingCard] = useState(false);
 
+  // Gemini suggested tags (own profile only)
+  const [suggestedTags, setSuggestedTags] = useState([]);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [lastSuggestionKey, setLastSuggestionKey] = useState("");
+
   const openCardEdit = () => {
     setCardDraft({
       fullName: profile?.fullName || "",
@@ -69,11 +75,33 @@ export default function Profile() {
     setEditingCard(true);
   };
 
+  const fetchSuggestionsFor = async (snapshot) => {
+    if (!isSelf) return;
+    const hasSignal = (snapshot?.bio || "").trim().length > 0 || (snapshot?.experience?.length || 0) > 0 || (snapshot?.skills?.length || 0) > 0;
+    if (!hasSignal) return;
+    const key = JSON.stringify({
+      bio: snapshot?.bio || "",
+      experience: snapshot?.experience || [],
+      skills: snapshot?.skills || [],
+      title: snapshot?.title || "",
+    });
+    if (key === lastSuggestionKey) return;
+    setLastSuggestionKey(key);
+    setLoadingSuggestions(true);
+    try {
+      const data = await getSuggestedTags();
+      setSuggestedTags(data.suggestions || []);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
   const saveCard = async () => {
     setSavingCard(true);
     try {
       const updated = await updateMe(cardDraft);
       setProfile((p) => ({ ...p, ...updated }));
+      fetchSuggestionsFor({ ...profile, ...updated });
       setEditingCard(false);
     } finally {
       setSavingCard(false);
@@ -111,6 +139,7 @@ export default function Profile() {
     try {
       const updated = await updateMe(fields);
       setProfile((p) => ({ ...p, ...updated }));
+      fetchSuggestionsFor({ ...profile, ...updated });
     } finally {
       setSavingSection(null);
     }
@@ -209,6 +238,42 @@ export default function Profile() {
                   </span>
                 ))}
               </div>
+
+              {/* Gemini suggested tags — own profile only */}
+              {isSelf && (
+                <div className="mt-2">
+                  {loadingSuggestions && (
+                    <p className="text-[11px] text-text-secondary font-body flex items-center gap-1">
+                      <span className="w-2.5 h-2.5 border border-accent-orange-rich border-t-transparent rounded-full animate-spin" />
+                      Suggestions are updating…
+                    </p>
+                  )}
+                  {suggestedTags.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 items-center mt-1">
+                      <span className="text-[10px] font-heading uppercase tracking-wide text-accent-orange-rich flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[12px]">auto_awesome</span>
+                        Suggested
+                      </span>
+                      {suggestedTags.map((tag) => (
+                        <button
+                          key={tag}
+                          onClick={async () => {
+                            const newSkills = [...(profile.skills || []), tag];
+                            await updateMe({ skills: newSkills });
+                            setProfile(p => ({ ...p, skills: newSkills }));
+                            setSuggestedTags(prev => prev.filter(t => t !== tag));
+                          }}
+                          title={`Add "${tag}" to your skills`}
+                          className="px-2.5 py-0.5 rounded-full border border-accent-orange-rich/40 text-accent-orange-rich font-body text-xs hover:bg-accent-orange-muted transition-colors flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-[11px]">add</span>
+                          {tag}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Availability badge */}
               <div className={`inline-flex items-center gap-2 border px-3 py-1 rounded-full mt-3 text-xs ${availOpt.color}`}>

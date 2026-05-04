@@ -1,13 +1,16 @@
 import { useState, useContext } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import DashboardSidebar from "../dashboard/DashboardSidebar";
 import DashboardBottomNav from "../dashboard/DashboardBottomNav";
 import ProfileSetupModal from "../onboarding/ProfileSetupModal";
 import AuthContext from "../../context/AuthContext";
 
 function AuthenticatedLayout({ children }) {
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const { user, profileComplete } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const initials = user?.fullName
     ? user.fullName.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -28,8 +31,16 @@ function AuthenticatedLayout({ children }) {
               className="w-full bg-surface-container-high border border-outline-variant rounded-full py-2 pl-10 pr-4 text-text-primary focus:outline-none focus:border-accent-orange-rich font-body text-sm"
               placeholder="Search..."
               type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key !== "Enter") return;
+                const nextQuery = searchInput.trim();
+                setSearchQuery(nextQuery);
+                if (nextQuery && location.pathname !== "/search") {
+                  navigate("/search");
+                }
+              }}
             />
           </div>
         </div>

@@ -193,6 +193,8 @@ app.use('/api/projects', require('./routes/projects'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/posts', require('./routes/posts'));
 app.use('/api/chat', require('./routes/chatRoutes'));
+app.use('/api/discover', require('./routes/discover').router);
+
 
 app.get('/', (req, res) => {
   res.json({ message: 'Skill Mesh API Server' });

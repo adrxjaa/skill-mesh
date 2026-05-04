@@ -4,6 +4,7 @@ const User = require('../models/User');
 const Review = require('../models/Review');
 const Project = require('../models/Project');
 const auth = require('../middleware/auth');
+const { reEmbedUser } = require('./discover');
 
 function publicUser(user) {
   return {
@@ -38,8 +39,15 @@ router.patch('/me', auth, async (req, res) => {
     'availability', 'socialLinks', 'skills', 'experience', 'profileComplete',
   ];
   const update = {};
+  let hasProfileChanges = false;
   for (const field of allowedFields) {
-    if (req.body[field] !== undefined) update[field] = req.body[field];
+    if (req.body[field] !== undefined) {
+      update[field] = req.body[field];
+      hasProfileChanges = true;
+    }
+  }
+  if (!hasProfileChanges) {
+    return res.status(400).json({ message: 'No profile updates provided' });
   }
   try {
     const user = await User.findByIdAndUpdate(
@@ -48,6 +56,10 @@ router.patch('/me', auth, async (req, res) => {
       { new: true, runValidators: true }
     ).select('-password');
     res.json(publicUser(user));
+    if (hasProfileChanges) {
+      // Re-embed in background — non-blocking
+      reEmbedUser(req.user.id).catch(e => console.error('[embed bg]', e.message));
+    }
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
