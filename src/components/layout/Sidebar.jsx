@@ -1,26 +1,22 @@
 import { useLocation, Link } from "react-router-dom";
 import {
-  Rss,
-  Users,
-  FolderKanban,
-  PenSquare,
+  Layers,
+  Search,
+  Network,
   MessageSquare,
-  HelpCircle,
-  LogOut,
-  Plus,
+  User,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
-  { label: "Feed", icon: Rss, path: "/dashboard" },
-  { label: "Network", icon: Users, path: "/search" },
-  { label: "Projects", icon: FolderKanban, path: "/projects" },
-  { label: "Reviews", icon: PenSquare, path: "/write-review" },
+  { label: "Feed", icon: Layers, path: "/dashboard" },
+  { label: "Search", icon: Search, path: "/search" },
   { label: "Messages", icon: MessageSquare, path: "/messages" },
+  { label: "Profile", icon: User, path: "/profile" },
 ];
 
 const bottomItems = [
-  { label: "Help", icon: HelpCircle, path: "/help" },
-  { label: "Logout", icon: LogOut, path: "/login" },
+  { label: "Settings", icon: Settings, path: "/settings" },
 ];
 
 /**
@@ -34,33 +30,36 @@ function Sidebar({ activeOverride }) {
   const currentPath = activeOverride || location.pathname;
 
   return (
-    <aside className="flex shrink-0 overflow-y-auto w-56 flex-col border-r border-surface-container-high bg-surface-container-lowest">
+    <aside className="flex shrink-0 overflow-y-auto w-64 flex-col border-r border-surface-container-high bg-surface-container-lowest">
       {/* Logo */}
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-white">
-          S
+      <div className="flex items-center gap-4 px-6 py-8">
+        <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-surface-container-high bg-surface-container shadow-inner">
+          <div className="absolute inset-0 bg-gradient-to-br from-black/40 to-transparent z-10" />
+          <Network size={24} className="absolute inset-0 m-auto text-primary opacity-90 drop-shadow-[0_0_8px_rgba(255,107,0,0.8)]" />
         </div>
         <div>
-          <p className="text-sm font-bold text-primary">SkillMesh</p>
-          <p className="text-[10px] text-text-secondary">Builder Ecosystem</p>
+          <p className="text-lg font-bold text-primary leading-tight tracking-wide">SkillMesh</p>
+          <p className="mt-0.5 text-[11px] font-medium text-text-secondary/80">Build Together</p>
         </div>
       </div>
 
       {/* Main nav */}
-      <nav className="mt-2 flex-1 space-y-1 px-3">
+      <nav className="mt-2 flex-1 space-y-0.5">
         {navItems.map(({ label, icon: Icon, path }) => {
-          const isActive = currentPath === path;
+          // For demo purposes, we highlight Feed if activeOverride isn't perfectly matching yet
+          const isActive = currentPath === path || (path === '/dashboard' && currentPath === '/');
+          
           return (
             <Link
               key={label}
               to={path}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+              className={`flex w-full items-center gap-4 px-6 py-3.5 text-[15px] font-medium transition-all ${
                 isActive
-                  ? "bg-primary/10 text-primary border border-primary/30"
-                  : "text-text-secondary hover:bg-surface-container-high/50 hover:text-on-surface border border-transparent"
+                  ? "bg-surface-container-high/60 border-r-[3px] border-primary text-primary"
+                  : "text-text-secondary/90 hover:bg-surface-container-high/30 hover:text-on-surface border-r-[3px] border-transparent"
               }`}
             >
-              <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+              <Icon size={20} strokeWidth={isActive ? 2.5 : 2} />
               {label}
             </Link>
           );
@@ -68,25 +67,24 @@ function Sidebar({ activeOverride }) {
       </nav>
 
       {/* Create Post button */}
-      <div className="px-3 pb-4">
-        <button className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary py-2.5 text-sm font-semibold text-white transition-colors hover:bg-primary-hover">
-          <Plus size={16} />
+      <div className="mt-auto px-6 pb-6 pt-4">
+        <button className="w-full rounded-[10px] bg-primary py-3 text-[15px] font-semibold text-white shadow-lg shadow-primary/20 transition-all hover:bg-primary-hover active:scale-[0.98]">
           Create Post
         </button>
       </div>
 
       {/* Divider */}
-      <div className="mx-3 border-t border-surface-container-high" />
+      <div className="border-t border-surface-container-high/60" />
 
       {/* Bottom nav */}
-      <nav className="space-y-1 px-3 py-3">
+      <nav className="py-2">
         {bottomItems.map(({ label, icon: Icon, path }) => (
           <Link
             key={label}
             to={path}
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-text-secondary transition-colors hover:bg-surface-container-high/50 hover:text-on-surface border border-transparent"
+            className="flex w-full items-center gap-4 border-r-[3px] border-transparent px-6 py-3.5 text-[15px] font-medium text-text-secondary/90 transition-all hover:bg-surface-container-high/30 hover:text-on-surface"
           >
-            <Icon size={18} strokeWidth={1.8} />
+            <Icon size={20} strokeWidth={2} />
             {label}
           </Link>
         ))}

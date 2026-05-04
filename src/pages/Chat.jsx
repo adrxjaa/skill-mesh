@@ -10,8 +10,8 @@ function Chat() {
   const conversations = [
     {
       id: 1,
-      name: 'Sarah Chen',
-      avatar: '👩‍💻',
+      name: 'Sarah Jenkins',
+      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
       lastMessage: 'That sounds great! When can we start?',
       timestamp: '2m ago',
       unread: 3,
@@ -19,8 +19,8 @@ function Chat() {
     },
     {
       id: 2,
-      name: 'Alex Rodriguez',
-      avatar: '👨‍💻',
+      name: 'Marcus Chen',
+      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
       lastMessage: 'I reviewed your portfolio, impressed!',
       timestamp: '1h ago',
       unread: 0,
@@ -28,8 +28,8 @@ function Chat() {
     },
     {
       id: 3,
-      name: 'Maya Patel',
-      avatar: '👩‍💼',
+      name: 'Elena Rodriguez',
+      avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
       lastMessage: 'Let me check with my team',
       timestamp: '3h ago',
       unread: 1,
@@ -38,7 +38,7 @@ function Chat() {
     {
       id: 4,
       name: 'Design Team',
-      avatar: '👥',
+      avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150&h=150&fit=crop',
       lastMessage: 'John: Looking forward to the collaboration',
       timestamp: '1d ago',
       unread: 0,
@@ -108,17 +108,9 @@ function Chat() {
 
   const currentConversation = conversations[selectedConversation];
 
-  const navItems = [
-    { icon: Home, label: 'Feed', active: false },
-    { icon: Search, label: 'Search', active: false },
-    { icon: Users, label: 'Connections', active: false },
-    { icon: MessageCircle, label: 'Messages', active: true }
-  ];
-
   const handleSendMessage = () => {
     if (messageInput.trim()) {
       setMessageInput('');
-      // Simulate typing indicator after a delay
       setTimeout(() => {
         setShowTypingIndicator(true);
         setTimeout(() => {
@@ -129,121 +121,132 @@ function Chat() {
   };
 
   return (
-    <div className="flex flex-1 w-full text-text-primary h-[calc(100vh-3.5rem)] overflow-hidden">
+    <div className="flex flex-1 w-full text-on-surface h-[calc(100vh-3.5rem)] overflow-hidden">
       {/* Conversations List */}
       <div className="w-96 border-r border-surface-container-high bg-surface flex flex-col">
         {/* Header */}
-        <div className="border-b border-border-color p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-text-primary">Messages</h2>
-            <button className="text-primary hover:text-primary-hover transition">
-              <MessageCircle size={24} />
+        <div className="p-6 pb-4">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-on-surface">Messages</h2>
+            <button className="text-text-secondary hover:text-primary transition-colors">
+              <MessageCircle size={22} />
             </button>
           </div>
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-3 text-text-secondary" size={18} />
+            <Search className="absolute left-3.5 top-3 text-text-secondary" size={18} />
             <input
               type="text"
               value={searchConversations}
               onChange={(e) => setSearchConversations(e.target.value)}
-              placeholder="Search conversations..."
-              className="w-full bg-input-bg border border-border-color rounded-lg px-3 py-2 pl-10 text-sm text-text-primary placeholder-text-secondary outline-none focus:border-primary transition"
+              placeholder="Search messages..."
+              className="w-full bg-surface-container border border-surface-container-high rounded-xl px-4 py-2.5 pl-11 text-sm text-on-surface placeholder-text-secondary outline-none focus:border-primary transition"
             />
           </div>
         </div>
 
         {/* Conversations */}
-        <div className="flex-1 overflow-y-auto">
-          {filteredConversations.map((conv, idx) => (
-            <button
-              key={conv.id}
-              onClick={() => setSelectedConversation(idx)}
-              className={`w-full border-b border-border-color p-4 text-left transition ${
-                selectedConversation === idx
-                  ? 'bg-input-bg'
-                  : 'hover:bg-input-bg'
-              }`}
-            >
-              <div className="flex items-start gap-3">
-                <div className="relative flex-shrink-0">
-                  <div className="text-3xl">{conv.avatar}</div>
-                  {conv.online && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border 2 border-card-bg" />
+        <div className="flex-1 overflow-y-auto px-3 space-y-1 pb-4">
+          {filteredConversations.map((conv, idx) => {
+            const isSelected = selectedConversation === idx;
+            return (
+              <button
+                key={conv.id}
+                onClick={() => setSelectedConversation(idx)}
+                className={`w-full p-3 rounded-xl text-left transition-colors ${
+                  isSelected
+                    ? 'bg-surface-container-high/50'
+                    : 'hover:bg-surface-container/50'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  <div className="relative flex-shrink-0">
+                    <img src={conv.avatar} alt={conv.name} className="w-12 h-12 rounded-full object-cover" />
+                    {conv.online && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-surface" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 pt-0.5">
+                    <div className="flex items-center justify-between">
+                      <h3 className={`text-sm truncate ${isSelected ? 'font-bold text-on-surface' : 'font-semibold text-text-secondary'}`}>{conv.name}</h3>
+                      <span className="text-xs text-text-secondary ml-2">{conv.timestamp}</span>
+                    </div>
+                    <p className={`text-xs truncate mt-1 ${isSelected ? 'text-text-secondary' : 'text-text-secondary/70'}`}>{conv.lastMessage}</p>
+                  </div>
+                  {conv.unread > 0 && (
+                    <div className="flex-shrink-0 w-5 h-5 bg-primary text-black text-xs rounded-full flex items-center justify-center font-bold mt-1">
+                      {conv.unread}
+                    </div>
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-text-primary truncate">{conv.name}</h3>
-                    <span className="text-xs text-text-secondary ml-2">{conv.timestamp}</span>
-                  </div>
-                  <p className="text-xs text-text-secondary truncate">{conv.lastMessage}</p>
-                </div>
-                {conv.unread > 0 && (
-                  <div className="flex-shrink-0 w-5 h-5 bg-primary text-black text-xs rounded-full flex items-center justify-center font-bold">
-                    {conv.unread}
-                  </div>
-                )}
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Chat Panel */}
-      <main className="flex-1 flex flex-col bg-surface-container-lowest">
+      <main className="flex-1 flex flex-col bg-surface-container-lowest relative">
         {currentConversation && (
           <>
             {/* Chat Header */}
-            <div className="border-b border-border-color bg-card-bg px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="text-4xl">{currentConversation.avatar}</div>
-                  <div>
-                    <h3 className="font-bold text-text-primary">{currentConversation.name}</h3>
-                    <div className="flex items-center gap-1 text-xs text-text-secondary">
-                      <div className="w-2 h-2 bg-green-500 rounded-full" />
-                      Online via Web
-                    </div>
+            <div className="bg-surface/90 backdrop-blur border-b border-surface-container-high px-6 py-4 flex items-center justify-between sticky top-0 z-10">
+              <div className="flex items-center gap-3">
+                <img src={currentConversation.avatar} alt={currentConversation.name} className="w-10 h-10 rounded-full object-cover" />
+                <div>
+                  <h3 className="font-bold text-on-surface text-sm">{currentConversation.name}</h3>
+                  <div className="flex items-center gap-1.5 text-xs text-text-secondary mt-0.5">
+                    {currentConversation.online ? (
+                      <>
+                        <div className="w-2 h-2 bg-green-500 rounded-full" />
+                        Online
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-2 h-2 bg-text-secondary/50 rounded-full" />
+                        Offline
+                      </>
+                    )}
                   </div>
                 </div>
+              </div>
 
-                <div className="flex items-center gap-4 text-text-secondary">
-                  <button className="hover:text-text-primary transition">
-                    <Phone size={20} />
-                  </button>
-                  <button className="hover:text-text-primary transition">
-                    <Video size={20} />
-                  </button>
-                  <button className="hover:text-text-primary transition">
-                    <Info size={20} />
-                  </button>
-                </div>
+              <div className="flex items-center gap-4 text-text-secondary">
+                <button className="hover:text-on-surface transition-colors">
+                  <Video size={18} />
+                </button>
+                <button className="hover:text-on-surface transition-colors">
+                  <Info size={18} />
+                </button>
               </div>
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {messages.map((msg) => {
                 if (msg.type === 'divider') {
                   return (
-                    <div key={msg.id} className="flex items-center gap-4 my-6">
-                      <div className="flex-1 h-px bg-border-color" />
-                      <span className="text-xs text-text-secondary">{msg.date}</span>
-                      <div className="flex-1 h-px bg-border-color" />
+                    <div key={msg.id} className="flex items-center gap-4 my-8">
+                      <div className="flex-1 h-px bg-surface-container-high" />
+                      <span className="text-xs font-medium text-text-secondary/70 uppercase tracking-wider">{msg.date}</span>
+                      <div className="flex-1 h-px bg-surface-container-high" />
                     </div>
                   );
+                }
+
+                if (msg.type === 'typing' && !showTypingIndicator) {
+                  return null;
                 }
 
                 if (msg.type === 'typing') {
                   return (
                     <div key={msg.id} className="flex gap-3 items-end">
-                      <div className="text-2xl">{msg.avatar}</div>
-                      <div className="bg-input-bg rounded-lg px-4 py-3 flex gap-1">
-                        <div className="w-2 h-2 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-2 h-2 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-2 h-2 bg-text-secondary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                      <img src={msg.avatar} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
+                      <div className="bg-surface-container-low border border-surface-container-high rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1.5">
+                        <div className="w-1.5 h-1.5 bg-text-secondary/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <div className="w-1.5 h-1.5 bg-text-secondary/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <div className="w-1.5 h-1.5 bg-text-secondary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                       </div>
                     </div>
                   );
@@ -252,12 +255,12 @@ function Chat() {
                 if (msg.type === 'received') {
                   return (
                     <div key={msg.id} className="flex gap-3 items-end">
-                      <div className="text-2xl">{msg.avatar}</div>
+                      <img src={msg.avatar} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
                       <div>
-                        <div className="bg-input-bg rounded-lg px-4 py-3 max-w-xs">
-                          <p className="text-sm text-text-primary">{msg.text}</p>
+                        <div className="bg-surface-container-low border border-surface-container-high rounded-2xl rounded-bl-sm px-4 py-3 max-w-md">
+                          <p className="text-sm text-on-surface leading-relaxed">{msg.text}</p>
                         </div>
-                        <span className="text-xs text-text-secondary ml-2 mt-1 inline-block">{msg.timestamp}</span>
+                        <span className="text-[10px] font-medium text-text-secondary/70 ml-2 mt-1.5 inline-block">{msg.timestamp}</span>
                       </div>
                     </div>
                   );
@@ -266,19 +269,18 @@ function Chat() {
                 if (msg.type === 'file') {
                   return (
                     <div key={msg.id} className="flex gap-3 items-end">
-                      <div className="text-2xl">{msg.avatar}</div>
+                      <img src={msg.avatar} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
                       <div>
-                        <div className="bg-card-bg border border-border-color rounded-lg px-4 py-3 flex items-center gap-3 w-64">
-                          <File size={20} className="text-primary" />
-                          <div className="flex-1">
-                            <p className="text-sm font-medium text-text-primary">{msg.filename}</p>
-                            <p className="text-xs text-text-secondary">{msg.filesize}</p>
+                        <div className="bg-surface-container-low border border-surface-container-high rounded-2xl rounded-bl-sm p-3 flex items-center gap-4 w-72 transition-colors hover:bg-surface-container">
+                          <div className="bg-primary/10 p-3 rounded-xl">
+                            <File size={24} className="text-primary" />
                           </div>
-                          <button className="text-primary hover:text-primary-hover transition">
-                            <Phone size={18} />
-                          </button>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-on-surface truncate">{msg.filename}</p>
+                            <p className="text-xs text-text-secondary mt-0.5">{msg.filesize}</p>
+                          </div>
                         </div>
-                        <span className="text-xs text-text-secondary ml-2 mt-1 inline-block">{msg.timestamp}</span>
+                        <span className="text-[10px] font-medium text-text-secondary/70 ml-2 mt-1.5 inline-block">{msg.timestamp}</span>
                       </div>
                     </div>
                   );
@@ -288,12 +290,12 @@ function Chat() {
                 return (
                   <div key={msg.id} className="flex gap-3 items-end justify-end">
                     <div>
-                      <div className="bg-primary text-black rounded-lg px-4 py-3 max-w-xs">
-                        <p className="text-sm font-medium">{msg.text}</p>
+                      <div className="bg-primary text-black rounded-2xl rounded-br-sm px-4 py-3 max-w-md">
+                        <p className="text-sm font-medium leading-relaxed">{msg.text}</p>
                       </div>
-                      <div className="flex items-center justify-end gap-1 mt-1 text-xs text-text-secondary mr-2">
-                        <span>{msg.timestamp}</span>
-                        {msg.read && <span>✓✓</span>}
+                      <div className="flex items-center justify-end gap-1.5 mt-1.5 mr-2">
+                        <span className="text-[10px] font-medium text-text-secondary/70">{msg.timestamp}</span>
+                        {msg.read && <span className="text-primary text-xs">✓✓</span>}
                       </div>
                     </div>
                   </div>
@@ -302,37 +304,33 @@ function Chat() {
             </div>
 
             {/* Input Area */}
-            <div className="border-t border-border-color bg-card-bg p-6">
-              <div className="flex items-center gap-3">
-                <button className="text-text-secondary hover:text-primary transition">
-                  <Plus size={24} />
-                </button>
+            <div className="bg-surface border-t border-surface-container-high p-4 px-6 flex items-end gap-3 sticky bottom-0">
+              <button className="p-2.5 text-text-secondary hover:text-primary hover:bg-primary/10 rounded-full transition-colors flex-shrink-0 mb-0.5">
+                <Plus size={22} />
+              </button>
 
-                <div className="flex-1 bg-input-bg border border-border-color rounded-lg px-4 py-3 flex items-center gap-3">
-                  <input
-                    type="text"
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleSendMessage();
-                      }
-                    }}
-                    placeholder="Type a message..."
-                    className="flex-1 bg-transparent text-text-primary placeholder-text-secondary outline-none text-sm"
-                  />
-                  <button className="text-text-secondary hover:text-primary transition">
-                    <Smile size={20} />
-                  </button>
-                </div>
-
-                <button
-                  onClick={handleSendMessage}
-                  className="bg-primary text-black p-3 rounded-full hover:bg-primary-hover transition flex-shrink-0"
-                >
-                  <Send size={20} />
-                </button>
+              <div className="flex-1 bg-surface-container-low border border-surface-container-high rounded-2xl flex items-end">
+                <textarea
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
+                  placeholder="Type a message..."
+                  className="flex-1 bg-transparent text-on-surface placeholder-text-secondary/70 outline-none text-sm px-4 py-3.5 resize-none max-h-32 min-h-[48px]"
+                  rows={1}
+                />
               </div>
+
+              <button
+                onClick={handleSendMessage}
+                className="bg-primary text-black p-3.5 rounded-full hover:bg-primary-hover transition-colors flex-shrink-0 shadow-lg shadow-primary/20 mb-0.5"
+              >
+                <Send size={18} className="translate-x-[-1px] translate-y-[1px]" />
+              </button>
             </div>
           </>
         )}
