@@ -1,11 +1,8 @@
 @import "tailwindcss";
-
 @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap");
-
-
+@config "../tailwind.config.js";
 
 @theme {
-
   --color-primary: #F27121;
   --color-primary-light: #FFB692;
   --color-primary-muted: rgba(242, 113, 33, 0.10);
@@ -13,7 +10,6 @@
 
   --color-secondary: #2D2D30;
   --color-tertiary: #1E1E21;
-
 
   --color-surface: #12131A;
   --color-surface-container-lowest: #0C0E14;
@@ -25,39 +21,30 @@
   --color-surface-charcoal: #121214;
   --color-surface-card: #1C1C1F;
 
-  
   --color-on-surface: #E2E1EB;
   --color-on-surface-variant: #DFC0B2;
-
 
   --color-text-primary: #F4F4F5;
   --color-text-secondary: #A1A1AA;
 
-    
   --color-outline: #A78B7E;
   --color-outline-variant: #584237;
 
-  
   --color-accent-orange-rich: #F27121;
   --color-accent-orange-muted: rgba(242, 113, 33, 0.10);
 
-  
   --color-status-success: #22C55E;
   --color-status-error: #EF4444;
 
-  
   --color-error: #FFB4AB;
   --color-error-container: #93000A;
-  
 
   --color-match-score-fill: #F27121;
   --color-background: #12131A;
   --color-on-background: #E2E1EB;
 
-
   --font-heading: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
-
 
   --font-size-h1: 40px;
   --font-size-h1--line-height: 1.2;
@@ -83,7 +70,6 @@
   --font-size-match-score: 14px;
   --font-size-match-score--line-height: 1;
 
-
   --radius-sm: 0.25rem;
   --radius-md: 0.75rem;
   --radius-lg: 1rem;
@@ -104,7 +90,6 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
 
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
@@ -128,7 +113,6 @@
     font-weight: 600;
   }
 }
-
 
 @layer utilities {
   .text-label-caps {
