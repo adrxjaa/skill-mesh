@@ -195,4 +195,20 @@ router.post('/:id/requests/:userId/respond', auth, async (req, res) => {
   }
 });
 
+// PATCH /api/projects/:id/end — mark project completed (owner only)
+router.patch('/:id/end', auth, async (req, res) => {
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ message: 'Project not found' });
+    if (project.owner.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Only the project owner can end the project' });
+    }
+    project.status = 'completed';
+    await project.save();
+    res.json({ message: 'Project ended', project });
+  } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
 module.exports = router;

@@ -51,6 +51,35 @@ export default function Profile() {
   const [reviewText, setReviewText] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
 
+  // Profile card editing
+  const [editingCard, setEditingCard] = useState(false);
+  const [cardDraft, setCardDraft] = useState({});
+  const [cardSkillInput, setCardSkillInput] = useState("");
+  const [savingCard, setSavingCard] = useState(false);
+
+  const openCardEdit = () => {
+    setCardDraft({
+      fullName: profile?.fullName || "",
+      title: profile?.title || "",
+      location: profile?.location || "",
+      availability: profile?.availability || "open-to-work",
+      skills: [...(profile?.skills || [])],
+    });
+    setCardSkillInput("");
+    setEditingCard(true);
+  };
+
+  const saveCard = async () => {
+    setSavingCard(true);
+    try {
+      const updated = await updateMe(cardDraft);
+      setProfile((p) => ({ ...p, ...updated }));
+      setEditingCard(false);
+    } finally {
+      setSavingCard(false);
+    }
+  };
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -156,9 +185,19 @@ export default function Profile() {
                       Connect
                     </button>
                   )}
-                  <button className="w-8 h-8 flex items-center justify-center border border-outline-variant text-text-secondary rounded-lg hover:text-text-primary hover:bg-surface-container-high transition-colors">
-                    <span className="material-symbols-outlined text-[18px]">more_horiz</span>
-                  </button>
+                  {isSelf ? (
+                    <button
+                      onClick={openCardEdit}
+                      className="w-8 h-8 flex items-center justify-center border border-outline-variant text-text-secondary rounded-lg hover:text-accent-orange-rich hover:bg-surface-container-high transition-colors"
+                      title="Edit profile card"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                    </button>
+                  ) : (
+                    <button className="w-8 h-8 flex items-center justify-center border border-outline-variant text-text-secondary rounded-lg hover:text-text-primary hover:bg-surface-container-high transition-colors">
+                      <span className="material-symbols-outlined text-[18px]">more_horiz</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -453,6 +492,97 @@ export default function Profile() {
           onClose={() => setConnectOpen(false)}
           targetUser={{ id: id, fullName: profile.fullName, avatar: profile.avatar, title: profile.title }}
         />
+      )}
+
+      {/* Profile Card Edit Modal */}
+      {editingCard && (
+        <div className="fixed inset-0 z-[150] flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setEditingCard(false)} />
+          <div className="relative w-full max-w-md bg-surface-card border border-surface-container-high rounded-2xl shadow-2xl overflow-hidden animate-[slideUp_0.2s_ease]">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-surface-container-high">
+              <h2 className="font-heading font-bold text-text-primary">Edit Profile</h2>
+              <button onClick={() => setEditingCard(false)} className="text-text-secondary hover:text-text-primary p-1 rounded-lg hover:bg-surface-container-high transition-colors">
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+            <div className="px-5 py-4 space-y-3 max-h-[70vh] overflow-y-auto">
+              {[
+                { key: "fullName", label: "Full Name", placeholder: "Your name" },
+                { key: "title", label: "Title / Role", placeholder: "e.g. Frontend Engineer" },
+                { key: "location", label: "Location", placeholder: "e.g. Bengaluru, India" },
+              ].map(({ key, label, placeholder }) => (
+                <div key={key}>
+                  <label className="text-xs font-heading uppercase tracking-wide text-text-secondary mb-1 block">{label}</label>
+                  <input
+                    type="text"
+                    value={cardDraft[key] || ""}
+                    onChange={(e) => setCardDraft((d) => ({ ...d, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    className="w-full bg-surface-container-high border border-outline-variant rounded-lg py-2.5 px-3 text-text-primary font-body focus:outline-none focus:border-accent-orange-rich transition-colors"
+                  />
+                </div>
+              ))}
+              {/* Availability */}
+              <div>
+                <label className="text-xs font-heading uppercase tracking-wide text-text-secondary mb-1 block">Availability</label>
+                <div className="flex gap-2 flex-wrap">
+                  {AVAILABILITY_OPTIONS.map((o) => (
+                    <button
+                      key={o.value}
+                      onClick={() => setCardDraft((d) => ({ ...d, availability: o.value }))}
+                      className={`px-3 py-1.5 rounded-full border text-xs font-heading font-semibold transition-all ${cardDraft.availability === o.value ? o.color + " border-current" : "border-outline-variant text-text-secondary"}`}
+                    >
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Skills */}
+              <div>
+                <label className="text-xs font-heading uppercase tracking-wide text-text-secondary mb-1 block">Skills</label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={cardSkillInput}
+                    onChange={(e) => setCardSkillInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && cardSkillInput.trim()) {
+                        e.preventDefault();
+                        const s = cardSkillInput.trim();
+                        if (!cardDraft.skills.includes(s)) {
+                          setCardDraft((d) => ({ ...d, skills: [...d.skills, s] }));
+                        }
+                        setCardSkillInput("");
+                      }
+                    }}
+                    placeholder="Add skill + Enter"
+                    className="flex-1 bg-surface-container-high border border-outline-variant rounded-lg py-2 px-3 text-text-primary font-body text-sm focus:outline-none focus:border-accent-orange-rich transition-colors"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {(cardDraft.skills || []).map((s) => (
+                    <span key={s} className="flex items-center gap-1 px-2.5 py-0.5 rounded-full border border-outline-variant text-text-secondary font-body text-xs">
+                      {s}
+                      <button onClick={() => setCardDraft((d) => ({ ...d, skills: d.skills.filter((x) => x !== s) }))} className="hover:text-red-400 transition-colors">
+                        <span className="material-symbols-outlined text-[12px]">close</span>
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="px-5 py-4 border-t border-surface-container-high flex justify-end gap-2">
+              <button onClick={() => setEditingCard(false)} className="px-4 py-2 text-text-secondary border border-outline-variant rounded-lg font-body text-sm hover:bg-surface-container-high transition-colors">Cancel</button>
+              <button
+                onClick={saveCard}
+                disabled={savingCard || !cardDraft.fullName?.trim()}
+                className="px-4 py-2 bg-accent-orange-rich text-white rounded-lg font-body text-sm font-medium hover:bg-accent-orange-rich/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {savingCard ? <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving...</> : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

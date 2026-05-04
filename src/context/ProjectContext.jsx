@@ -51,8 +51,15 @@ export function ProjectProvider({ children }) {
 
   const respondToRequest = useCallback(async (projectId, userId, action) => {
     await projectApi.respondToRequest(projectId, userId, action);
-    await fetchProjects(); // Refresh
+    await fetchProjects();
   }, [fetchProjects]);
+
+  const endProject = useCallback(async (projectId) => {
+    await projectApi.endProject(projectId);
+    setProjects((prev) =>
+      prev.map((p) => p._id === projectId ? { ...p, status: 'completed' } : p)
+    );
+  }, []);
 
   return (
     <ProjectContext.Provider
@@ -65,6 +72,7 @@ export function ProjectProvider({ children }) {
         inviteToProject,
         respondToInvite,
         respondToRequest,
+        endProject,
         refetch: fetchProjects,
       }}
     >
