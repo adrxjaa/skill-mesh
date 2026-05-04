@@ -49,6 +49,11 @@ export function ProjectProvider({ children }) {
     await fetchProjects(); // Refresh
   }, [fetchProjects]);
 
+  const respondToRequest = useCallback(async (projectId, userId, action) => {
+    await projectApi.respondToRequest(projectId, userId, action);
+    await fetchProjects(); // Refresh
+  }, [fetchProjects]);
+
   return (
     <ProjectContext.Provider
       value={{
@@ -59,6 +64,7 @@ export function ProjectProvider({ children }) {
         createProject,
         inviteToProject,
         respondToInvite,
+        respondToRequest,
         refetch: fetchProjects,
       }}
     >

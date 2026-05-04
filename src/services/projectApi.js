@@ -14,3 +14,6 @@ export const inviteToProject = (projectId, { targetUserId, sourcePost }) =>
 
 export const respondToInvite = (projectId, action) =>
   api.post(`/projects/${projectId}/respond`, { action }).then((r) => r.data);
+
+export const respondToRequest = (projectId, userId, action) =>
+  api.post(`/projects/${projectId}/requests/${userId}/respond`, { action }).then((r) => r.data);

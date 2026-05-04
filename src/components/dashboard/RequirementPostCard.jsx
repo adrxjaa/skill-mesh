@@ -1,11 +1,13 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import useFeed from "../../hooks/useFeed";
+import useAuth from "../../hooks/useAuth";
 import { timeAgo } from "../../context/FeedContext";
 import CommentSection from "./CommentSection";
 
 function RequirementPostCard({ post }) {
   const { toggleLike, toggleInterest, isLiked, hasInterest, deletePost } = useFeed();
+  const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,7 +36,7 @@ function RequirementPostCard({ post }) {
 
   const liked = isLiked(post.id);
   const interested = hasInterest(post.id);
-  const isOwnPost = post.author.id === "u1";
+  const isOwnPost = post.author.id === (user?.id || user?._id);
 
   const handleDelete = () => {
     deletePost(post.id);
@@ -204,26 +206,28 @@ function RequirementPostCard({ post }) {
             <span className="material-symbols-outlined text-[18px]">share</span>
           </button>
         </div>
-        <button
-          onClick={() => toggleInterest(post.id)}
-          className={`px-4 py-1.5 rounded-lg font-body text-body-sm font-medium transition-colors flex items-center gap-2 ${
-            interested
-              ? "bg-accent-orange-muted text-accent-orange-rich border border-accent-orange-rich/30"
-              : "border-[1.5px] border-accent-orange-rich text-accent-orange-rich hover:bg-accent-orange-muted"
-          }`}
-        >
-          {interested ? (
-            <>
-              Interested
-              <span className="material-symbols-outlined text-[16px]">check</span>
-            </>
-          ) : (
-            <>
-              Express Interest
-              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-            </>
-          )}
-        </button>
+        {!isOwnPost && (
+          <button
+            onClick={() => toggleInterest(post.id, post.projectId)}
+            className={`px-4 py-1.5 rounded-lg font-body text-body-sm font-medium transition-colors flex items-center gap-2 ${
+              interested
+                ? "bg-accent-orange-muted text-accent-orange-rich border border-accent-orange-rich/30"
+                : "border-[1.5px] border-accent-orange-rich text-accent-orange-rich hover:bg-accent-orange-muted"
+            }`}
+          >
+            {interested ? (
+              <>
+                Interested
+                <span className="material-symbols-outlined text-[16px]">check</span>
+              </>
+            ) : (
+              <>
+                Express Interest
+                <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* Comments section */}

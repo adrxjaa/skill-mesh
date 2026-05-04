@@ -12,6 +12,7 @@ router.get('/', auth, async (req, res) => {
     })
       .populate('owner', 'fullName avatar')
       .populate('members', 'fullName avatar')
+      .populate('invites.user', 'fullName avatar')
       .sort({ createdAt: -1 });
     res.json(projects);
   } catch (err) {
@@ -126,6 +127,70 @@ router.post('/:id/respond', auth, async (req, res) => {
     await project.save();
     res.json({ message: `Invite ${action}ed` });
   } catch (err) {
+    res.status(500).send('Server Error');
+  }
+});
+
+// POST /api/projects/:id/request-join — express interest / request to join a project
+router.post('/:id/request-join', auth, async (req, res) => {
+  const { sourcePost } = req.body; // optional: the post that triggered this
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ message: 'Project not found' });
+
+    // Already a member?
+    if (project.members.map(String).includes(req.user.id)) {
+      return res.status(400).json({ message: 'You are already a member of this project' });
+    }
+
+    // Already have a pending request/invite?
+    const existingInvite = project.invites.find(
+      (i) => i.user.toString() === req.user.id && i.status === 'pending'
+    );
+    if (existingInvite) {
+      return res.status(400).json({ message: 'You already have a pending request for this project' });
+    }
+
+    project.invites.push({
+      user: req.user.id,
+      sourcePost: sourcePost || null,
+      status: 'pending',
+    });
+    await project.save();
+    res.json({ message: 'Interest expressed — the project owner will be notified' });
+  } catch (err) {
+    console.error('POST /api/projects/:id/request-join error:', err.message);
+    res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+// POST /api/projects/:id/requests/:userId/respond — owner accepts/declines a join request
+router.post('/:id/requests/:userId/respond', auth, async (req, res) => {
+  const { action } = req.body; // 'accept' | 'decline'
+  try {
+    const project = await Project.findById(req.params.id);
+    if (!project) return res.status(404).json({ message: 'Project not found' });
+    if (project.owner.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Only the project owner can respond to requests' });
+    }
+
+    const invite = project.invites.find(
+      (i) => i.user.toString() === req.params.userId && i.status === 'pending'
+    );
+    if (!invite) return res.status(404).json({ message: 'No pending request found for this user' });
+
+    if (action === 'accept') {
+      invite.status = 'accepted';
+      if (!project.members.map(String).includes(req.params.userId)) {
+        project.members.push(req.params.userId);
+      }
+    } else {
+      invite.status = 'declined';
+    }
+    await project.save();
+    res.json({ message: `Request ${action}ed` });
+  } catch (err) {
+    console.error('POST /api/projects/:id/requests/:userId/respond error:', err.message);
     res.status(500).send('Server Error');
   }
 });

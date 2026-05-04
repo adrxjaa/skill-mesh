@@ -1,8 +1,10 @@
 import { useContext, useState } from "react";
 import ProjectContext from "../context/ProjectContext";
+import useAuth from "../hooks/useAuth";
 
 function Projects() {
-  const { projects, invites, loading, respondToInvite, createProject } = useContext(ProjectContext);
+  const { user } = useAuth();
+  const { projects, invites, loading, respondToInvite, respondToRequest, createProject } = useContext(ProjectContext);
   const [showCreate, setShowCreate] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newDesc, setNewDesc] = useState("");
@@ -181,6 +183,44 @@ function Projects() {
                         {project.members?.length || 1} member{(project.members?.length || 1) !== 1 ? "s" : ""}
                       </span>
                     </div>
+
+                    {/* Incoming Requests (for project owner) */}
+                    {project.owner?._id === (user?.id || user?._id) && project.invites && project.invites.filter(i => i.status === 'pending').length > 0 && (
+                      <div className="mt-4 pt-3 border-t border-outline-variant">
+                        <h4 className="text-[11px] font-heading font-semibold text-text-secondary uppercase tracking-wider mb-2 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-accent-orange-rich animate-pulse" />
+                          Join Requests ({project.invites.filter(i => i.status === 'pending').length})
+                        </h4>
+                        <div className="flex flex-col gap-2">
+                          {project.invites.filter(i => i.status === 'pending').map((invite, i) => (
+                            <div key={i} className="flex items-center justify-between bg-surface-container-high rounded-lg p-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-full bg-accent-orange-rich/20 flex items-center justify-center text-[9px] font-heading font-bold text-accent-orange-rich overflow-hidden shrink-0">
+                                  {invite.user?.avatar
+                                    ? <img src={invite.user.avatar.startsWith("/uploads") ? `http://localhost:5000${invite.user.avatar}` : invite.user.avatar} alt="" className="w-full h-full object-cover" />
+                                    : (invite.user?.fullName || "?")[0]}
+                                </div>
+                                <span className="text-xs font-body text-text-primary truncate">{invite.user?.fullName || "A user"}</span>
+                              </div>
+                              <div className="flex gap-1 shrink-0">
+                                <button
+                                  onClick={() => respondToRequest(project._id, invite.user?._id || invite.user, "decline")}
+                                  className="px-2 py-1 text-text-secondary hover:text-text-primary border border-outline-variant rounded font-body text-[10px] transition-colors"
+                                >
+                                  Decline
+                                </button>
+                                <button
+                                  onClick={() => respondToRequest(project._id, invite.user?._id || invite.user, "accept")}
+                                  className="px-2 py-1 bg-accent-orange-rich/20 text-accent-orange-rich border border-accent-orange-rich/30 hover:bg-accent-orange-rich hover:text-white rounded font-body text-[10px] transition-colors"
+                                >
+                                  Accept
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1,11 +1,13 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 import useFeed from "../../hooks/useFeed";
+import useAuth from "../../hooks/useAuth";
 import { timeAgo } from "../../context/FeedContext";
 import CommentSection from "./CommentSection";
 
 function CommunityPostCard({ post }) {
   const { toggleLike, isLiked, deletePost } = useFeed();
+  const { user } = useAuth();
   const [showComments, setShowComments] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -33,7 +35,7 @@ function CommunityPostCard({ post }) {
   };
 
   const liked = isLiked(post.id);
-  const isOwnPost = post.author.id === "u1";
+  const isOwnPost = post.author.id === (user?.id || user?._id);
 
   const handleDelete = () => {
     deletePost(post.id);
