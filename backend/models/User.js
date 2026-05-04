@@ -11,7 +11,7 @@ const ExperienceSchema = new mongoose.Schema({
 const UserSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
+  password: { type: String, required: true, select: false },
 
   // Profile fields
   bio: { type: String, default: '' },

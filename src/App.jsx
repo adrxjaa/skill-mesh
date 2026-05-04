@@ -9,8 +9,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Profile from "./pages/Profile";
-import ProfileEditor from "./pages/ProfileEditor";
-import WriteReview from "./pages/WriteReview";
 import Chat from "./pages/Chat";
 import SearchResults from "./pages/SearchResults";
 import Settings from "./pages/Settings";
@@ -26,8 +24,6 @@ function App() {
     const isAuthRoute = [
       "/dashboard",
       "/profile",
-      "/profile-editor",
-      "/write-review",
       "/messages",
       "/search",
       "/settings",
@@ -50,8 +46,6 @@ function App() {
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-              <Route path="/profile-editor" element={<ProtectedRoute><ProfileEditor /></ProtectedRoute>} />
-              <Route path="/write-review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/search" element={<ProtectedRoute><SearchResults /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
