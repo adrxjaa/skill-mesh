@@ -9,7 +9,7 @@ module.exports = function (req, res, next) {
   const token = authHeader.split(' ')[1];
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret123');
-    req.user = decoded.user; // { id }
+    req.user = decoded.user; 
     next();
   } catch {
     res.status(401).json({ message: 'Token is not valid' });

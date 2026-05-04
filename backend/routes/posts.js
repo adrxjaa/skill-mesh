@@ -4,7 +4,7 @@ const Post = require('../models/Post');
 const Project = require('../models/Project');
 const auth = require('../middleware/auth');
 
-// GET /api/posts — feed with optional ?type= and ?search= filters
+
 router.get('/', auth, async (req, res) => {
   try {
     const { type, search } = req.query;
@@ -37,7 +37,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// POST /api/posts — create a post
+
 router.post('/', auth, async (req, res) => {
   const { body, type, title, tags, openToWork, imageUrl, linkUrl, projectId } = req.body;
 
@@ -45,7 +45,7 @@ router.post('/', auth, async (req, res) => {
     return res.status(400).json({ message: 'Post body is required' });
   }
 
-  // Requirement posts MUST have a valid project
+  
   if (type === 'requirement') {
     if (!projectId) {
       return res.status(400).json({ message: 'A project is required for requirement posts' });
@@ -54,7 +54,7 @@ router.post('/', auth, async (req, res) => {
     if (!project) {
       return res.status(400).json({ message: 'Invalid project' });
     }
-    // Only the project owner or a member can post for this project
+    
     const isMember =
       project.owner.toString() === req.user.id ||
       project.members.map(String).includes(req.user.id);
@@ -89,7 +89,7 @@ router.post('/', auth, async (req, res) => {
   }
 });
 
-// DELETE /api/posts/:id — delete own post
+
 router.delete('/:id', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -105,7 +105,7 @@ router.delete('/:id', auth, async (req, res) => {
   }
 });
 
-// POST /api/posts/:id/like — toggle like
+
 router.post('/:id/like', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
@@ -128,7 +128,7 @@ router.post('/:id/like', auth, async (req, res) => {
   }
 });
 
-// POST /api/posts/:id/comment — add a comment
+
 router.post('/:id/comment', auth, async (req, res) => {
   const { text } = req.body;
   if (!text || !text.trim()) {
@@ -142,7 +142,7 @@ router.post('/:id/comment', auth, async (req, res) => {
     post.comments.push({ author: req.user.id, text: text.trim() });
     await post.save();
 
-    // Return the newly created comment with populated author
+    
     const updated = await Post.findById(post._id).populate('comments.author', 'fullName avatar');
     const newComment = updated.comments[updated.comments.length - 1];
 
@@ -153,7 +153,7 @@ router.post('/:id/comment', auth, async (req, res) => {
   }
 });
 
-// GET /api/posts/:id/comments — get all comments for a post
+
 router.get('/:id/comments', auth, async (req, res) => {
   try {
     const post = await Post.findById(req.params.id).populate('comments.author', 'fullName avatar');

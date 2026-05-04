@@ -98,8 +98,8 @@ router.patch('/change-password', authMiddleware, async (req, res) => {
   if (!currentPassword || !newPassword) {
     return res.status(400).json({ message: 'Both fields are required.' });
   }
-  if (newPassword.length < 8) {
-    return res.status(400).json({ message: 'Password must be at least 8 characters.' });
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: 'Password must be at least 6 characters.' });
   }
   try {
     const user = await User.findById(req.user.id).select('+password');

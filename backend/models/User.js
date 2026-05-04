@@ -13,11 +13,10 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true, select: false },
 
-  // Profile fields
   bio: { type: String, default: '' },
-  title: { type: String, default: '' },            // e.g. "Senior Full-Stack Engineer"
+  title: { type: String, default: '' },            
   location: { type: String, default: '' },
-  avatar: { type: String, default: '' },           // relative URL: /uploads/<file>
+  avatar: { type: String, default: '' },           
   availability: {
     type: String,
     enum: ['open-to-work', 'freelancing', 'not-available'],
@@ -31,6 +30,11 @@ const UserSchema = new mongoose.Schema({
   },
   skills: { type: [String], default: [] },
   experience: { type: [ExperienceSchema], default: [] },
+
+
+  //embeddings for vec
+  embedding: { type: [Number], default: [], select: false },
+  normalizedTags: { type: [String], default: [] },          
 
   profileComplete: { type: Boolean, default: false },
 

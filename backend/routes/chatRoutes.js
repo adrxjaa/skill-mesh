@@ -4,13 +4,7 @@ const auth = require('../middleware/auth');
 const Project = require('../models/Project');
 const User = require('../models/User');
 
-/**
- * GET /api/chat/conversations
- *
- * Returns everything the Chat UI needs to render the sidebar:
- *   - projects: all active projects the user is a member of (with populated members)
- *   - dmUsers:  flat list of unique teammates the user can DM
- */
+
 router.get('/conversations', auth, async (req, res) => {
   try {
     const projects = await Project.find({
