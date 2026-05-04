@@ -15,6 +15,7 @@ import Chat from "./pages/Chat";
 import SearchResults from "./pages/SearchResults";
 import Settings from "./pages/Settings";
 import { FeedProvider } from "./context/FeedContext";
+import { ProfileProvider } from "./context/ProfileContext";
 
 function App() {
   function AppContent() {
@@ -60,7 +61,9 @@ function App() {
   return (
     <BrowserRouter>
       <FeedProvider>
-        <AppContent />
+        <ProfileProvider>
+          <AppContent />
+        </ProfileProvider>
       </FeedProvider>
     </BrowserRouter>
   );
