@@ -44,61 +44,55 @@ function RequirementPostCard({ post }) {
   };
 
   return (
-    <article className="bg-surface-card border-l-4 border-l-accent-orange-rich border-y border-r border-outline-variant rounded-r-xl rounded-l-sm p-5 relative shadow-[0_0_15px_rgba(242,113,33,0.05)] hover:shadow-[0_0_20px_rgba(242,113,33,0.1)] transition-shadow">
-      {/* Badge */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
-        {/* Open to Work badge */}
-        {post.openToWork && (
-          <span className="bg-green-500/10 text-green-400 font-heading text-label-caps px-2 py-1 rounded border border-green-500/30 flex items-center gap-1">
-            <span className="material-symbols-outlined text-[14px]">work</span>
-            Open to Work
-          </span>
-        )}
-        {/* Label badge */}
-        <span className="bg-accent-orange-muted text-accent-orange-rich font-heading text-label-caps px-2 py-1 rounded border border-accent-orange-rich/30 flex items-center gap-1">
-          <span className="material-symbols-outlined text-[14px]">group_add</span>
-          {post.label}
-        </span>
-      </div>
+    <article className="bg-surface-card border-l-4 border-l-accent-orange-rich border-y border-r border-outline-variant rounded-r-xl rounded-l-sm p-5 shadow-[0_0_15px_rgba(242,113,33,0.05)] hover:shadow-[0_0_20px_rgba(242,113,33,0.1)] transition-shadow">
 
-      {/* Author row */}
-      <div className="flex gap-3 items-center mb-3">
+      {/* Header row: avatar + name + badges + menu */}
+      <div className="flex gap-3 items-start mb-3">
         <div className="w-10 h-10 rounded-full bg-accent-orange-rich/20 flex items-center justify-center text-accent-orange-rich font-heading font-bold text-body-sm flex-shrink-0">
           {post.author.initials}
         </div>
-        <div className="flex-1">
-          <h3 className="font-heading text-body-md font-semibold text-text-primary m-0">
-            {post.author.displayName}
-          </h3>
-          <p className="font-body text-body-sm text-text-secondary m-0">
-            {post.author.title} • {timeAgo(post.createdAt)}
-          </p>
+        <div className="flex-1 min-w-0">
+          <h3 className="font-heading text-body-md font-semibold text-text-primary m-0">{post.author.displayName}</h3>
+          <p className="font-body text-body-sm text-text-secondary m-0">{post.author.title} • {timeAgo(post.createdAt)}</p>
         </div>
-        {/* ··· menu — own posts only */}
-        {isOwnPost && (
-          <div className="relative">
-            <button
-              onClick={() => setMenuOpen((o) => !o)}
-              className="text-text-secondary hover:text-text-primary transition-colors p-1.5 rounded-lg hover:bg-surface-container-high"
-            >
-              <span className="material-symbols-outlined text-[18px]">more_horiz</span>
-            </button>
-            {menuOpen && (
-              <>
-                <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-                <div className="absolute right-0 top-8 z-20 bg-surface-card border border-outline-variant rounded-xl shadow-xl overflow-hidden min-w-[140px]">
-                  <button
-                    onClick={() => { setMenuOpen(false); setShowDeleteConfirm(true); }}
-                    className="w-full flex items-center gap-2 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-colors font-body text-sm"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">delete</span>
-                    Delete post
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        )}
+        {/* Badges */}
+        <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
+          {post.openToWork && (
+            <span className="bg-green-500/10 text-green-400 font-heading text-label-caps px-2 py-1 rounded border border-green-500/30 flex items-center gap-1">
+              <span className="material-symbols-outlined text-[14px]">work</span>
+              Open to Work
+            </span>
+          )}
+          <span className="bg-accent-orange-muted text-accent-orange-rich font-heading text-label-caps px-2 py-1 rounded border border-accent-orange-rich/30 flex items-center gap-1">
+            <span className="material-symbols-outlined text-[14px]">group_add</span>
+            {post.label}
+          </span>
+          {/* ··· menu — own posts only */}
+          {isOwnPost && (
+            <div className="relative">
+              <button
+                onClick={() => setMenuOpen((o) => !o)}
+                className="text-text-secondary hover:text-text-primary transition-colors p-1 rounded-lg hover:bg-surface-container-high"
+              >
+                <span className="material-symbols-outlined text-[18px]">more_horiz</span>
+              </button>
+              {menuOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+                  <div className="absolute right-0 top-8 z-20 bg-surface-card border border-outline-variant rounded-xl shadow-xl overflow-hidden min-w-[140px]">
+                    <button
+                      onClick={() => { setMenuOpen(false); setShowDeleteConfirm(true); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-red-400 hover:bg-red-500/10 transition-colors font-body text-sm"
+                    >
+                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                      Delete post
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Delete confirmation */}

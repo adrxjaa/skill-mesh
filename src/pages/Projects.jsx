@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ProjectContext from "../context/ProjectContext";
 import useAuth from "../hooks/useAuth";
+import { submitReview } from "../services/profileApi";
 
 function Projects() {
   const { user } = useAuth();
@@ -13,6 +14,26 @@ function Projects() {
   const [creating, setCreating] = useState(false);
   const [endingId, setEndingId] = useState(null);
   const [confirmEndId, setConfirmEndId] = useState(null);
+  // Review state: { [projectId_userId]: { open, rating, text, submitting, done } }
+  const [reviewState, setReviewState] = useState({});
+  const [expandedReviews, setExpandedReviews] = useState({});
+
+  const reviewKey = (projectId, userId) => `${projectId}__${userId}`;
+
+  const setReview = (key, patch) =>
+    setReviewState((s) => ({ ...s, [key]: { rating: 5, text: "", submitting: false, done: false, ...s[key], ...patch } }));
+
+  const handleSubmitReview = async (projectId, targetUserId) => {
+    const key = reviewKey(projectId, targetUserId);
+    const r = reviewState[key] || { rating: 5, text: "" };
+    setReview(key, { submitting: true });
+    try {
+      await submitReview(targetUserId, { rating: r.rating, text: r.text, projectId });
+      setReview(key, { submitting: false, done: true });
+    } catch {
+      setReview(key, { submitting: false });
+    }
+  };
 
   const handleCreate = async () => {
     if (!newTitle.trim()) return;
@@ -288,6 +309,91 @@ function Projects() {
                               </div>
                             ))}
                           </div>
+                        </div>
+                      )}
+                      {/* ── Review section for completed projects ── */}
+                      {isCompleted && (
+                        <div className="mt-4 pt-3 border-t border-outline-variant">
+                          <button
+                            onClick={() => setExpandedReviews((e) => ({ ...e, [project._id]: !e[project._id] }))}
+                            className="flex items-center gap-2 text-sm font-heading font-semibold text-text-secondary hover:text-text-primary transition-colors w-full"
+                          >
+                            <span className="material-symbols-outlined text-[16px] text-yellow-400">star</span>
+                            Write Reviews for Teammates
+                            <span className="material-symbols-outlined text-[14px] ml-auto">
+                              {expandedReviews[project._id] ? "expand_less" : "expand_more"}
+                            </span>
+                          </button>
+
+                          {expandedReviews[project._id] && (
+                            <div className="mt-3 flex flex-col gap-3">
+                              {(project.members || [])
+                                .filter((m) => (m._id || m) !== (user?.id || user?._id))
+                                .map((m) => {
+                                  const mid = m._id || m;
+                                  const key = reviewKey(project._id, mid);
+                                  const rs = reviewState[key] || { rating: 5, text: "" };
+                                  return (
+                                    <div key={mid} className="bg-surface-container-high rounded-xl p-3">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <button onClick={() => navigate(`/profile/${mid}`)} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                                          <div className="w-7 h-7 rounded-full bg-accent-orange-rich/20 flex items-center justify-center text-[10px] font-bold text-accent-orange-rich overflow-hidden shrink-0">
+                                            {avatarSrc(m) ? <img src={avatarSrc(m)} alt="" className="w-full h-full object-cover" /> : (m.fullName || "?")[0]}
+                                          </div>
+                                          <span className="text-sm font-heading font-semibold text-text-primary hover:text-accent-orange-rich transition-colors">{m.fullName || "Teammate"}</span>
+                                        </button>
+                                      </div>
+
+                                      {rs.done ? (
+                                        <p className="text-green-400 text-xs font-body flex items-center gap-1">
+                                          <span className="material-symbols-outlined text-[14px]">check_circle</span>
+                                          Review submitted!
+                                        </p>
+                                      ) : (
+                                        <>
+                                          {/* Star rating */}
+                                          <div className="flex gap-1 mb-2">
+                                            {[1, 2, 3, 4, 5].map((star) => (
+                                              <button
+                                                key={star}
+                                                onClick={() => setReview(key, { rating: star })}
+                                                className="transition-transform hover:scale-110"
+                                              >
+                                                <span
+                                                  className={`material-symbols-outlined text-xl ${star <= (rs.rating || 5) ? "text-yellow-400" : "text-surface-container-high"}`}
+                                                  style={{ fontVariationSettings: `'FILL' ${star <= (rs.rating || 5) ? 1 : 0}` }}
+                                                >star</span>
+                                              </button>
+                                            ))}
+                                          </div>
+                                          <textarea
+                                            value={rs.text || ""}
+                                            onChange={(e) => setReview(key, { text: e.target.value })}
+                                            placeholder={`What was it like working with ${m.fullName?.split(" ")[0] || "them"}?`}
+                                            rows={2}
+                                            className="w-full bg-surface border border-outline-variant rounded-lg py-2 px-3 text-text-primary font-body text-sm resize-none focus:outline-none focus:border-accent-orange-rich transition-colors mb-2"
+                                          />
+                                          <button
+                                            onClick={() => handleSubmitReview(project._id, mid)}
+                                            disabled={rs.submitting || !rs.text?.trim()}
+                                            className="px-3 py-1.5 bg-accent-orange-rich text-white rounded-lg font-body text-xs font-medium hover:bg-accent-orange-rich/90 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+                                          >
+                                            {rs.submitting ? (
+                                              <><span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Submitting...</>
+                                            ) : (
+                                              <><span className="material-symbols-outlined text-[14px]">send</span>Submit Review</>
+                                            )}
+                                          </button>
+                                        </>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              {(project.members || []).filter((m) => (m._id || m) !== (user?.id || user?._id)).length === 0 && (
+                                <p className="text-text-secondary text-xs font-body">No other members to review.</p>
+                              )}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
