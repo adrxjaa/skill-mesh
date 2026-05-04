@@ -7,8 +7,19 @@ import useAuth from "../hooks/useAuth";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { loginAsDemo } = useAuth();
+  const { loginAsDemo, login } = useAuth();
   const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      await login(email, password);
+      navigate("/search");
+    } catch (err) {
+      console.error("Login failed", err);
+      alert("Invalid credentials");
+    }
+  };
 
   const handleDemoLogin = () => {
     loginAsDemo();
@@ -87,7 +98,10 @@ function Login() {
               </div>
 
               {/* Login Button */}
-              <button className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-primary-hover transition mb-4">
+              <button 
+                onClick={handleLogin}
+                className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-primary-hover transition mb-4"
+              >
                 Login
               </button>
               

@@ -10,7 +10,7 @@ function ProfilePosts() {
 
   if (userPosts.length === 0) {
     return (
-      <div className="text-center py-xl">
+      <div className="text-center py-12">
         <span className="material-symbols-outlined text-5xl text-text-secondary/30 mb-4 block">
           edit_note
         </span>
@@ -22,7 +22,7 @@ function ProfilePosts() {
   }
 
   return (
-    <div className="flex flex-col gap-sm">
+    <div className="flex flex-col gap-4">
       {userPosts.map((post) =>
         post.type === "requirement" ? (
           <RequirementPostCard key={post.id} post={post} />

@@ -121,7 +121,7 @@ function Chat() {
   };
 
   return (
-    <div className="flex flex-1 w-full text-on-surface h-[calc(100vh-3.5rem)] overflow-hidden">
+    <div className="flex w-full text-on-surface h-full overflow-hidden">
       {/* Conversations List */}
       <div className="w-96 border-r border-surface-container-high bg-surface flex flex-col">
         {/* Header */}

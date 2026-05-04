@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { Card, CardHeaders, CardContent } from '../components/common/Card';
+import useAuth from '../hooks/useAuth';
 
 function Register() {
   const [fullName, setFullName] = useState('');
@@ -9,6 +10,19 @@ function Register() {
   const [password, setPassword] = useState('');
   const [skills, setSkills] = useState(['React', 'UI Design']);
   const [skillInput, setSkillInput] = useState('');
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+      await register(fullName, email, password, skills);
+      navigate("/search");
+    } catch (err) {
+      console.error("Registration failed", err);
+      alert("Registration failed. Try again.");
+    }
+  };
 
   const handleAddSkill = (e) => {
     if (e.key === 'Enter' && skillInput.trim()) {
@@ -126,7 +140,10 @@ function Register() {
               </div>
 
               {/* Create Account Button */}
-              <button className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-primary-hover transition mb-6">
+              <button 
+                onClick={handleRegister}
+                className="w-full bg-primary text-black font-bold py-3 rounded-lg hover:bg-primary-hover transition mb-6"
+              >
                 Create Account
               </button>
 
