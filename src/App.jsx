@@ -14,8 +14,10 @@ import WriteReview from "./pages/WriteReview";
 import Chat from "./pages/Chat";
 import SearchResults from "./pages/SearchResults";
 import Settings from "./pages/Settings";
+import Projects from "./pages/Projects";
 import { FeedProvider } from "./context/FeedContext";
 import { ProfileProvider } from "./context/ProfileContext";
+import { ProjectProvider } from "./context/ProjectContext";
 
 function App() {
   function AppContent() {
@@ -28,6 +30,7 @@ function App() {
       "/messages",
       "/search",
       "/settings",
+      "/projects",
     ].some(
       (path) => location.pathname === path || location.pathname.startsWith(`${path}/`)
     );
@@ -45,11 +48,13 @@ function App() {
             <Route element={<AuthenticatedLayout />}>
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="/profile-editor" element={<ProtectedRoute><ProfileEditor /></ProtectedRoute>} />
               <Route path="/write-review" element={<ProtectedRoute><WriteReview /></ProtectedRoute>} />
               <Route path="/messages" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/search" element={<ProtectedRoute><SearchResults /></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+              <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
             </Route>
           </Routes>
         </main>
@@ -62,7 +67,9 @@ function App() {
     <BrowserRouter>
       <FeedProvider>
         <ProfileProvider>
-          <AppContent />
+          <ProjectProvider>
+            <AppContent />
+          </ProjectProvider>
         </ProfileProvider>
       </FeedProvider>
     </BrowserRouter>

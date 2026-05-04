@@ -8,30 +8,16 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
-  // On mount, if a token exists in localStorage, fetch the current user
   useEffect(() => {
     const restoreSession = async () => {
       const savedToken = localStorage.getItem("token");
       if (savedToken) {
-        // Demo token — restore the demo user without calling the API
         if (savedToken === "demo-token-skillmesh") {
-          setUser({
-            _id: "demo-user-001",
-            displayName: "Ananya Bhat",
-            username: "ananyabuilds",
-            email: "ananya@demo.skillmesh",
-            role: "user",
-            avatar: "",
-            bio: "Frontend developer helping founders shape polished product experiences.",
-            location: "Bengaluru, India",
-            skills: ["React", "CSS", "Figma", "TypeScript", "Tailwind CSS"],
-            availability: "open-to-work",
-          });
+          setUser(DEMO_USER);
           setToken(savedToken);
           setLoading(false);
           return;
         }
-
         try {
           const res = await api.get("/auth/me", {
             headers: { Authorization: `Bearer ${savedToken}` },
@@ -39,7 +25,6 @@ export function AuthProvider({ children }) {
           setUser(res.data.user || res.data);
           setToken(savedToken);
         } catch {
-          // Token is invalid or expired — clear it
           localStorage.removeItem("token");
           setToken(null);
           setUser(null);
@@ -47,7 +32,6 @@ export function AuthProvider({ children }) {
       }
       setLoading(false);
     };
-
     restoreSession();
   }, []);
 
@@ -60,17 +44,21 @@ export function AuthProvider({ children }) {
     return userData;
   };
 
-  const register = async (displayName, email, password) => {
-    const res = await api.post("/auth/register", {
-      displayName,
-      email,
-      password,
-    });
+  const register = async (fullName, email, password, skills) => {
+    const res = await api.post("/auth/register", { fullName, email, password, skills });
     const { token: newToken, user: userData } = res.data;
     localStorage.setItem("token", newToken);
     setToken(newToken);
     setUser(userData);
     return userData;
+  };
+
+  /** Update the current user's profile (calls PATCH /api/profile/me) */
+  const updateMe = async (fields) => {
+    const res = await api.patch("/profile/me", fields);
+    const updated = res.data;
+    setUser((prev) => ({ ...prev, ...updated }));
+    return updated;
   };
 
   const logout = () => {
@@ -79,39 +67,46 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  // Demo login — bypasses the API so the app works without a backend
   const loginAsDemo = () => {
-    const demoToken = "demo-token-skillmesh";
-    const demoUser = {
-      _id: "demo-user-001",
-      displayName: "Ananya Bhat",
-      username: "ananyabuilds",
-      email: "ananya@demo.skillmesh",
-      role: "user",
-      avatar: "",
-      bio: "Frontend developer helping founders shape polished product experiences.",
-      location: "Bengaluru, India",
-      skills: ["React", "CSS", "Figma", "TypeScript", "Tailwind CSS"],
-      availability: "open-to-work",
-    };
-    localStorage.setItem("token", demoToken);
-    setToken(demoToken);
-    setUser(demoUser);
-    return demoUser;
+    localStorage.setItem("token", "demo-token-skillmesh");
+    setToken("demo-token-skillmesh");
+    setUser(DEMO_USER);
+    return DEMO_USER;
   };
 
-  const value = {
-    user,
-    token,
-    loading,
-    isAuthenticated: !!token && !!user,
-    login,
-    register,
-    logout,
-    loginAsDemo,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        isAuthenticated: !!token && !!user,
+        profileComplete: user?.profileComplete ?? false,
+        login,
+        register,
+        logout,
+        loginAsDemo,
+        updateMe,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
+
+const DEMO_USER = {
+  id: "demo-user-001",
+  fullName: "Ananya Bhat",
+  email: "ananya@demo.skillmesh",
+  bio: "Frontend developer helping founders shape polished product experiences.",
+  title: "Frontend Developer",
+  location: "Bengaluru, India",
+  avatar: "",
+  availability: "open-to-work",
+  socialLinks: { portfolio: "", github: "", linkedin: "", twitter: "" },
+  skills: ["React", "CSS", "Figma", "TypeScript", "Tailwind CSS"],
+  experience: [],
+  profileComplete: true, // demo user skips onboarding
+};
 
 export default AuthContext;
