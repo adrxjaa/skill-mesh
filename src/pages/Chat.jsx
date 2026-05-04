@@ -1,322 +1,685 @@
-import { useState } from 'react';
-import { Search, MessageCircle, Home, Users, Phone, Video, Info, Plus, Smile, Send, File, MoreVertical, Clock } from 'lucide-react';
+import { useState, useEffect, useContext, useRef } from "react";
+import {
+  Search,
+  Send,
+  Users,
+  MessageSquare,
+  Hash,
+  FileText,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Circle,
+} from "lucide-react";
+import AuthContext from "../context/AuthContext";
+import ChatContext from "../context/ChatContext";
+import api from "../services/api";
 
 function Chat() {
-  const [selectedConversation, setSelectedConversation] = useState(0);
-  const [messageInput, setMessageInput] = useState('');
-  const [searchConversations, setSearchConversations] = useState('');
-  const [showTypingIndicator, setShowTypingIndicator] = useState(false);
+  const { user } = useContext(AuthContext);
+  const {
+    connected,
+    conversations,
+    setConversations,
+    activeConversation,
+    setActiveConversation,
+    messages,
+    typingUsers,
+    sendGroupMessage,
+    sendDM,
+    emitTyping,
+    emitStopTyping,
+    isOnline,
+    getUnread,
+    getConversationKey,
+    dmKey,
+  } = useContext(ChatContext);
 
-  const conversations = [
-    {
-      id: 1,
-      name: 'Sarah Jenkins',
-      avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-      lastMessage: 'That sounds great! When can we start?',
-      timestamp: '2m ago',
-      unread: 3,
-      online: true
-    },
-    {
-      id: 2,
-      name: 'Marcus Chen',
-      avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      lastMessage: 'I reviewed your portfolio, impressed!',
-      timestamp: '1h ago',
-      unread: 0,
-      online: true
-    },
-    {
-      id: 3,
-      name: 'Elena Rodriguez',
-      avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
-      lastMessage: 'Let me check with my team',
-      timestamp: '3h ago',
-      unread: 1,
-      online: false
-    },
-    {
-      id: 4,
-      name: 'Design Team',
-      avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=150&h=150&fit=crop',
-      lastMessage: 'John: Looking forward to the collaboration',
-      timestamp: '1d ago',
-      unread: 0,
-      online: false
+  const [messageInput, setMessageInput] = useState("");
+  const [searchFilter, setSearchFilter] = useState("");
+  const [showProjectInfo, setShowProjectInfo] = useState(true);
+  const [loadingConversations, setLoadingConversations] = useState(true);
+  const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+
+  // ── Load conversations on mount ───────────────────────────────────────────
+  useEffect(() => {
+    const fetchConversations = async () => {
+      try {
+        const res = await api.get("/chat/conversations");
+        setConversations(res.data);
+      } catch (err) {
+        console.error("Failed to load conversations:", err);
+      } finally {
+        setLoadingConversations(false);
+      }
+    };
+    if (user && user.id !== "demo-user-001") {
+      fetchConversations();
+    } else {
+      setLoadingConversations(false);
     }
-  ];
+  }, [user, setConversations]);
 
-  const messages = [
-    {
-      id: 1,
-      type: 'divider',
-      date: 'Today'
-    },
-    {
-      id: 2,
-      type: 'received',
-      text: 'Hey! I really enjoyed your profile. Love your React Native work!',
-      timestamp: '10:30 AM',
-      avatar: conversations[selectedConversation]?.avatar
-    },
-    {
-      id: 3,
-      type: 'sent',
-      text: 'Thanks! I appreciate that. Your portfolio looks impressive too.',
-      timestamp: '10:45 AM',
-      read: true
-    },
-    {
-      id: 4,
-      type: 'received',
-      text: 'Would you be interested in collaborating on a mobile app project?',
-      timestamp: '10:50 AM',
-      avatar: conversations[selectedConversation]?.avatar
-    },
-    {
-      id: 5,
-      type: 'sent',
-      text: 'Absolutely! I have some free time next month. Tell me more about the project.',
-      timestamp: '11:05 AM',
-      read: true
-    },
-    {
-      id: 6,
-      type: 'received',
-      text: 'Perfect! Here\'s our initial design mockup and requirements document.',
-      timestamp: '11:20 AM',
-      avatar: conversations[selectedConversation]?.avatar
-    },
-    {
-      id: 7,
-      type: 'file',
-      filename: 'project_requirements.pdf',
-      filesize: '2.4 MB',
-      timestamp: '11:20 AM',
-      avatar: conversations[selectedConversation]?.avatar
-    },
-    {
-      id: 8,
-      type: 'typing',
-      avatar: conversations[selectedConversation]?.avatar
+  // ── Auto-scroll to bottom on new messages ─────────────────────────────────
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const activeKey = getConversationKey(activeConversation);
+
+  const currentTypingUsers = activeKey
+    ? (typingUsers[activeKey] || []).filter((id) => id !== user?.id)
+    : [];
+
+  // Find user info by ID from conversations
+  const findUser = (userId) => {
+    for (const p of conversations.projects || []) {
+      for (const m of p.members || []) {
+        if ((m._id || m) === userId) return m;
+      }
     }
-  ];
+    for (const u of conversations.dmUsers || []) {
+      if (u._id === userId) return u;
+    }
+    return null;
+  };
 
-  const filteredConversations = conversations.filter(conv =>
-    conv.name.toLowerCase().includes(searchConversations.toLowerCase())
-  );
+  const getInitials = (name) =>
+    name
+      ? name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+          .slice(0, 2)
+      : "?";
 
-  const currentConversation = conversations[selectedConversation];
+  const getAvatar = (userObj) => {
+    if (!userObj) return null;
+    if (userObj.avatar) {
+      return userObj.avatar.startsWith("/uploads")
+        ? `http://localhost:5000${userObj.avatar}`
+        : userObj.avatar;
+    }
+    return null;
+  };
 
-  const handleSendMessage = () => {
-    if (messageInput.trim()) {
-      setMessageInput('');
-      setTimeout(() => {
-        setShowTypingIndicator(true);
-        setTimeout(() => {
-          setShowTypingIndicator(false);
-        }, 2000);
-      }, 500);
+  const formatTime = (ts) => {
+    if (!ts) return "";
+    const d = new Date(ts);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const getLastMessage = (convKey) => {
+    try {
+      const raw = localStorage.getItem(`chat:${convKey}`);
+      if (!raw) return null;
+      const msgs = JSON.parse(raw);
+      return msgs.length > 0 ? msgs[msgs.length - 1] : null;
+    } catch {
+      return null;
     }
   };
 
+  // ── Send message ──────────────────────────────────────────────────────────
+  const handleSend = () => {
+    const text = messageInput.trim();
+    if (!text || !activeConversation) return;
+
+    if (activeConversation.type === "group") {
+      sendGroupMessage(activeConversation.id, text);
+    } else {
+      sendDM(activeConversation.id, text);
+    }
+    setMessageInput("");
+
+    // Stop typing indicator
+    if (activeConversation.type === "group") {
+      emitStopTyping(activeConversation.id, null);
+    } else {
+      emitStopTyping(null, activeConversation.id);
+    }
+  };
+
+  // ── Typing handler ────────────────────────────────────────────────────────
+  const handleInputChange = (e) => {
+    setMessageInput(e.target.value);
+
+    if (!activeConversation) return;
+
+    // Emit typing
+    if (activeConversation.type === "group") {
+      emitTyping(activeConversation.id, null);
+    } else {
+      emitTyping(null, activeConversation.id);
+    }
+
+    // Clear previous timeout
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => {
+      if (activeConversation.type === "group") {
+        emitStopTyping(activeConversation.id, null);
+      } else {
+        emitStopTyping(null, activeConversation.id);
+      }
+    }, 2000);
+  };
+
+  // ── Filter conversations ──────────────────────────────────────────────────
+  const filteredProjects = (conversations.projects || []).filter((p) =>
+    p.title.toLowerCase().includes(searchFilter.toLowerCase())
+  );
+  const filteredDMs = (conversations.dmUsers || []).filter((u) =>
+    u.fullName.toLowerCase().includes(searchFilter.toLowerCase())
+  );
+
+  // ── Get the active project object ─────────────────────────────────────────
+  const activeProject =
+    activeConversation?.type === "group"
+      ? (conversations.projects || []).find(
+          (p) => p._id === activeConversation.id
+        )
+      : null;
+
+  const activeDMUser =
+    activeConversation?.type === "dm"
+      ? (conversations.dmUsers || []).find(
+          (u) => u._id === activeConversation.id
+        )
+      : null;
+
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex w-full text-on-surface h-full overflow-hidden">
-      {/* Conversations List */}
-      <div className="w-96 border-r border-surface-container-high bg-surface flex flex-col">
+      {/* ── Left Panel: Conversation List ─────────────────────────────────── */}
+      <div className="w-80 xl:w-96 border-r border-surface-container-high bg-surface flex flex-col flex-shrink-0">
         {/* Header */}
-        <div className="p-6 pb-4">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-on-surface">Messages</h2>
-            <button className="text-text-secondary hover:text-primary transition-colors">
-              <MessageCircle size={22} />
-            </button>
+        <div className="p-5 pb-3">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold text-on-surface font-heading">
+              Messages
+            </h2>
+            <div className="flex items-center gap-2">
+              {connected ? (
+                <span className="flex items-center gap-1.5 text-xs text-status-success">
+                  <Circle size={8} fill="currentColor" />
+                  Live
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 text-xs text-text-secondary">
+                  <Circle size={8} />
+                  Offline
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Search */}
           <div className="relative">
-            <Search className="absolute left-3.5 top-3 text-text-secondary" size={18} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary"
+              size={16}
+            />
             <input
               type="text"
-              value={searchConversations}
-              onChange={(e) => setSearchConversations(e.target.value)}
-              placeholder="Search messages..."
-              className="w-full bg-surface-container border border-surface-container-high rounded-xl px-4 py-2.5 pl-11 text-sm text-on-surface placeholder-text-secondary outline-none focus:border-primary transition"
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              placeholder="Search conversations..."
+              className="w-full bg-surface-container border border-surface-container-high rounded-xl px-4 py-2.5 pl-10 text-sm text-on-surface placeholder-text-secondary outline-none focus:border-primary transition"
             />
           </div>
         </div>
 
-        {/* Conversations */}
-        <div className="flex-1 overflow-y-auto px-3 space-y-1 pb-4">
-          {filteredConversations.map((conv, idx) => {
-            const isSelected = selectedConversation === idx;
-            return (
-              <button
-                key={conv.id}
-                onClick={() => setSelectedConversation(idx)}
-                className={`w-full p-3 rounded-xl text-left transition-colors ${
-                  isSelected
-                    ? 'bg-surface-container-high/50'
-                    : 'hover:bg-surface-container/50'
-                }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className="relative flex-shrink-0">
-                    <img src={conv.avatar} alt={conv.name} className="w-12 h-12 rounded-full object-cover" />
-                    {conv.online && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-surface" />
-                    )}
+        {/* Conversation list */}
+        <div className="flex-1 overflow-y-auto px-3 pb-4">
+          {loadingConversations ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <>
+              {/* ── Project Groups ──────────────────────────────────────── */}
+              {filteredProjects.length > 0 && (
+                <div className="mb-4">
+                  <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-text-secondary">
+                    Project Groups
+                  </p>
+                  <div className="space-y-0.5">
+                    {filteredProjects.map((project) => {
+                      const key = `group:${project._id}`;
+                      const isActive =
+                        activeConversation?.type === "group" &&
+                        activeConversation?.id === project._id;
+                      const unreadCount = getUnread(key);
+                      const lastMsg = getLastMessage(key);
+
+                      return (
+                        <button
+                          key={project._id}
+                          onClick={() =>
+                            setActiveConversation({
+                              type: "group",
+                              id: project._id,
+                            })
+                          }
+                          className={`w-full p-3 rounded-xl text-left transition-colors ${
+                            isActive
+                              ? "bg-primary/10 border border-primary/20"
+                              : "hover:bg-surface-container/50 border border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+                              <Hash
+                                size={18}
+                                className="text-primary"
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <h3
+                                  className={`text-sm truncate font-semibold ${
+                                    isActive
+                                      ? "text-primary"
+                                      : "text-on-surface"
+                                  }`}
+                                >
+                                  {project.title}
+                                </h3>
+                                {lastMsg && (
+                                  <span className="text-[10px] text-text-secondary ml-2 flex-shrink-0">
+                                    {formatTime(lastMsg.timestamp)}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between mt-1">
+                                <p className="text-xs text-text-secondary truncate">
+                                  {lastMsg
+                                    ? lastMsg.text
+                                    : `${project.members?.length || 0} members`}
+                                </p>
+                                {unreadCount > 0 && (
+                                  <span className="flex-shrink-0 w-5 h-5 bg-primary text-white text-[10px] rounded-full flex items-center justify-center font-bold ml-2">
+                                    {unreadCount}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
-                  <div className="flex-1 min-w-0 pt-0.5">
-                    <div className="flex items-center justify-between">
-                      <h3 className={`text-sm truncate ${isSelected ? 'font-bold text-on-surface' : 'font-semibold text-text-secondary'}`}>{conv.name}</h3>
-                      <span className="text-xs text-text-secondary ml-2">{conv.timestamp}</span>
-                    </div>
-                    <p className={`text-xs truncate mt-1 ${isSelected ? 'text-text-secondary' : 'text-text-secondary/70'}`}>{conv.lastMessage}</p>
-                  </div>
-                  {conv.unread > 0 && (
-                    <div className="flex-shrink-0 w-5 h-5 bg-primary text-black text-xs rounded-full flex items-center justify-center font-bold mt-1">
-                      {conv.unread}
-                    </div>
-                  )}
                 </div>
-              </button>
-            );
-          })}
+              )}
+
+              {/* ── Direct Messages ─────────────────────────────────────── */}
+              {filteredDMs.length > 0 && (
+                <div>
+                  <p className="px-3 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-text-secondary">
+                    Direct Messages
+                  </p>
+                  <div className="space-y-0.5">
+                    {filteredDMs.map((dmUser) => {
+                      const key = dmKey(user?.id, dmUser._id);
+                      const isActive =
+                        activeConversation?.type === "dm" &&
+                        activeConversation?.id === dmUser._id;
+                      const unreadCount = getUnread(key);
+                      const lastMsg = getLastMessage(key);
+                      const online = isOnline(dmUser._id);
+
+                      return (
+                        <button
+                          key={dmUser._id}
+                          onClick={() =>
+                            setActiveConversation({
+                              type: "dm",
+                              id: dmUser._id,
+                            })
+                          }
+                          className={`w-full p-3 rounded-xl text-left transition-colors ${
+                            isActive
+                              ? "bg-primary/10 border border-primary/20"
+                              : "hover:bg-surface-container/50 border border-transparent"
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className="relative flex-shrink-0">
+                              {getAvatar(dmUser) ? (
+                                <img
+                                  src={getAvatar(dmUser)}
+                                  alt={dmUser.fullName}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-xs font-bold text-text-secondary">
+                                  {getInitials(dmUser.fullName)}
+                                </div>
+                              )}
+                              {online && (
+                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-status-success rounded-full border-2 border-surface" />
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between">
+                                <h3
+                                  className={`text-sm truncate font-semibold ${
+                                    isActive
+                                      ? "text-primary"
+                                      : "text-on-surface"
+                                  }`}
+                                >
+                                  {dmUser.fullName}
+                                </h3>
+                                {lastMsg && (
+                                  <span className="text-[10px] text-text-secondary ml-2 flex-shrink-0">
+                                    {formatTime(lastMsg.timestamp)}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center justify-between mt-1">
+                                <p className="text-xs text-text-secondary truncate">
+                                  {lastMsg
+                                    ? lastMsg.text
+                                    : dmUser.title || "Teammate"}
+                                </p>
+                                {unreadCount > 0 && (
+                                  <span className="flex-shrink-0 w-5 h-5 bg-primary text-white text-[10px] rounded-full flex items-center justify-center font-bold ml-2">
+                                    {unreadCount}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty state */}
+              {filteredProjects.length === 0 &&
+                filteredDMs.length === 0 && (
+                  <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+                    <MessageSquare
+                      size={40}
+                      className="text-text-secondary/30 mb-3"
+                    />
+                    <p className="text-sm text-text-secondary">
+                      {searchFilter
+                        ? "No conversations match your search."
+                        : "No conversations yet. Join a project to start chatting!"}
+                    </p>
+                  </div>
+                )}
+            </>
+          )}
         </div>
       </div>
 
-      {/* Chat Panel */}
-      <main className="flex-1 flex flex-col bg-surface-container-lowest relative">
-        {currentConversation && (
+      {/* ── Right Panel: Chat Area ────────────────────────────────────────── */}
+      <main className="flex-1 flex flex-col bg-surface-container-lowest relative min-w-0">
+        {activeConversation ? (
           <>
-            {/* Chat Header */}
-            <div className="bg-surface/90 backdrop-blur border-b border-surface-container-high px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-              <div className="flex items-center gap-3">
-                <img src={currentConversation.avatar} alt={currentConversation.name} className="w-10 h-10 rounded-full object-cover" />
+            {/* ── Chat Header ──────────────────────────────────────────── */}
+            <div className="bg-surface/90 backdrop-blur border-b border-surface-container-high px-6 py-4 flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                {activeProject ? (
+                  <>
+                    <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center flex-shrink-0">
+                      <Hash size={20} className="text-primary" />
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-on-surface text-sm truncate">
+                        {activeProject.title}
+                      </h3>
+                      <p className="text-xs text-text-secondary mt-0.5">
+                        {activeProject.members?.length || 0} members
+                      </p>
+                    </div>
+                  </>
+                ) : activeDMUser ? (
+                  <>
+                    <div className="relative flex-shrink-0">
+                      {getAvatar(activeDMUser) ? (
+                        <img
+                          src={getAvatar(activeDMUser)}
+                          alt={activeDMUser.fullName}
+                          className="w-10 h-10 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-xs font-bold text-text-secondary">
+                          {getInitials(activeDMUser.fullName)}
+                        </div>
+                      )}
+                      {isOnline(activeDMUser._id) && (
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-status-success rounded-full border-2 border-surface" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-on-surface text-sm truncate">
+                        {activeDMUser.fullName}
+                      </h3>
+                      <p className="text-xs text-text-secondary mt-0.5">
+                        {isOnline(activeDMUser._id) ? "Online" : "Offline"}
+                      </p>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+
+              {/* Toggle project info */}
+              {activeProject && (
+                <button
+                  onClick={() => setShowProjectInfo((v) => !v)}
+                  className="text-text-secondary hover:text-on-surface transition-colors p-2"
+                >
+                  {showProjectInfo ? (
+                    <ChevronUp size={18} />
+                  ) : (
+                    <ChevronDown size={18} />
+                  )}
+                </button>
+              )}
+            </div>
+
+            {/* ── Project Info Panel ───────────────────────────────────── */}
+            {activeProject && showProjectInfo && (
+              <div className="border-b border-surface-container-high bg-surface-container-low/50 px-6 py-5 flex-shrink-0">
+                {/* Project Name Hero */}
+                <div className="mb-4">
+                  <h2 className="text-lg font-bold text-primary font-heading">
+                    {activeProject.title}{" "}
+                    <span className="text-on-surface">here</span>
+                  </h2>
+                </div>
+
+                {/* Description */}
+                {activeProject.description && (
+                  <p className="text-sm text-text-secondary leading-relaxed mb-4">
+                    {activeProject.description}
+                  </p>
+                )}
+
+                {/* Google Docs Link */}
+                {activeProject.docsLink && (
+                  <a
+                    href={activeProject.docsLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-surface-container border border-surface-container-high rounded-lg px-4 py-2.5 text-sm text-primary hover:bg-primary/10 transition-colors mb-4"
+                  >
+                    <FileText size={16} />
+                    <span className="font-medium">Project Document (DDS)</span>
+                    <ExternalLink size={14} className="text-text-secondary" />
+                  </a>
+                )}
+
+                {/* Members List */}
                 <div>
-                  <h3 className="font-bold text-on-surface text-sm">{currentConversation.name}</h3>
-                  <div className="flex items-center gap-1.5 text-xs text-text-secondary mt-0.5">
-                    {currentConversation.online ? (
-                      <>
-                        <div className="w-2 h-2 bg-green-500 rounded-full" />
-                        Online
-                      </>
-                    ) : (
-                      <>
-                        <div className="w-2 h-2 bg-text-secondary/50 rounded-full" />
-                        Offline
-                      </>
-                    )}
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-text-secondary mb-3">
+                    <Users size={12} className="inline mr-1.5" />
+                    Team Members
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {(activeProject.members || []).map((member) => {
+                      const mid = member._id || member;
+                      const name = member.fullName || "Unknown";
+                      const online = isOnline(mid);
+                      const isMe = mid === user?.id;
+
+                      return (
+                        <div
+                          key={mid}
+                          className="flex items-center gap-2 bg-surface-container border border-surface-container-high rounded-full px-3 py-1.5"
+                        >
+                          <div className="relative">
+                            {getAvatar(member) ? (
+                              <img
+                                src={getAvatar(member)}
+                                alt={name}
+                                className="w-6 h-6 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-6 h-6 rounded-full bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-text-secondary">
+                                {getInitials(name)}
+                              </div>
+                            )}
+                            {online && (
+                              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-status-success rounded-full border-[1.5px] border-surface-container" />
+                            )}
+                          </div>
+                          <span className="text-xs font-medium text-on-surface">
+                            {isMe ? "You" : name}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
+            )}
 
-              <div className="flex items-center gap-4 text-text-secondary">
-                <button className="hover:text-on-surface transition-colors">
-                  <Video size={18} />
-                </button>
-                <button className="hover:text-on-surface transition-colors">
-                  <Info size={18} />
-                </button>
-              </div>
-            </div>
+            {/* ── Messages ────────────────────────────────────────────── */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
+              {messages.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full text-center">
+                  <MessageSquare
+                    size={40}
+                    className="text-text-secondary/20 mb-3"
+                  />
+                  <p className="text-sm text-text-secondary">
+                    No messages yet. Say hello! 👋
+                  </p>
+                </div>
+              ) : (
+                messages.map((msg) => {
+                  const isMine = msg.senderId === user?.id;
+                  const sender = findUser(msg.senderId);
+                  const senderName = sender?.fullName || "Unknown";
 
-            {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
-              {messages.map((msg) => {
-                if (msg.type === 'divider') {
                   return (
-                    <div key={msg.id} className="flex items-center gap-4 my-8">
-                      <div className="flex-1 h-px bg-surface-container-high" />
-                      <span className="text-xs font-medium text-text-secondary/70 uppercase tracking-wider">{msg.date}</span>
-                      <div className="flex-1 h-px bg-surface-container-high" />
-                    </div>
-                  );
-                }
-
-                if (msg.type === 'typing' && !showTypingIndicator) {
-                  return null;
-                }
-
-                if (msg.type === 'typing') {
-                  return (
-                    <div key={msg.id} className="flex gap-3 items-end">
-                      <img src={msg.avatar} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
-                      <div className="bg-surface-container-low border border-surface-container-high rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1.5">
-                        <div className="w-1.5 h-1.5 bg-text-secondary/60 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <div className="w-1.5 h-1.5 bg-text-secondary/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                        <div className="w-1.5 h-1.5 bg-text-secondary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                      </div>
-                    </div>
-                  );
-                }
-
-                if (msg.type === 'received') {
-                  return (
-                    <div key={msg.id} className="flex gap-3 items-end">
-                      <img src={msg.avatar} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
-                      <div>
-                        <div className="bg-surface-container-low border border-surface-container-high rounded-2xl rounded-bl-sm px-4 py-3 max-w-md">
-                          <p className="text-sm text-on-surface leading-relaxed">{msg.text}</p>
+                    <div
+                      key={msg.id}
+                      className={`flex gap-3 items-end ${
+                        isMine ? "justify-end" : ""
+                      }`}
+                    >
+                      {/* Avatar for received */}
+                      {!isMine && (
+                        <div className="flex-shrink-0">
+                          {getAvatar(sender) ? (
+                            <img
+                              src={getAvatar(sender)}
+                              alt={senderName}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-[10px] font-bold text-text-secondary">
+                              {getInitials(senderName)}
+                            </div>
+                          )}
                         </div>
-                        <span className="text-[10px] font-medium text-text-secondary/70 ml-2 mt-1.5 inline-block">{msg.timestamp}</span>
-                      </div>
-                    </div>
-                  );
-                }
+                      )}
 
-                if (msg.type === 'file') {
-                  return (
-                    <div key={msg.id} className="flex gap-3 items-end">
-                      <img src={msg.avatar} alt="Avatar" className="w-8 h-8 rounded-full object-cover" />
-                      <div>
-                        <div className="bg-surface-container-low border border-surface-container-high rounded-2xl rounded-bl-sm p-3 flex items-center gap-4 w-72 transition-colors hover:bg-surface-container">
-                          <div className="bg-primary/10 p-3 rounded-xl">
-                            <File size={24} className="text-primary" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-on-surface truncate">{msg.filename}</p>
-                            <p className="text-xs text-text-secondary mt-0.5">{msg.filesize}</p>
-                          </div>
+                      <div
+                        className={`max-w-md ${isMine ? "text-right" : ""}`}
+                      >
+                        {/* Sender name for group chats */}
+                        {!isMine &&
+                          activeConversation?.type === "group" && (
+                            <p className="text-[11px] font-semibold text-primary mb-1 ml-1">
+                              {senderName}
+                            </p>
+                          )}
+                        <div
+                          className={`rounded-2xl px-4 py-3 ${
+                            isMine
+                              ? "bg-primary text-white rounded-br-sm"
+                              : "bg-surface-container-low border border-surface-container-high rounded-bl-sm"
+                          }`}
+                        >
+                          <p
+                            className={`text-sm leading-relaxed ${
+                              isMine
+                                ? "font-medium"
+                                : "text-on-surface"
+                            }`}
+                          >
+                            {msg.text}
+                          </p>
                         </div>
-                        <span className="text-[10px] font-medium text-text-secondary/70 ml-2 mt-1.5 inline-block">{msg.timestamp}</span>
+                        <span className="text-[10px] font-medium text-text-secondary/70 mt-1 inline-block mx-1">
+                          {formatTime(msg.timestamp)}
+                        </span>
                       </div>
                     </div>
                   );
-                }
+                })
+              )}
 
-                // Sent message
-                return (
-                  <div key={msg.id} className="flex gap-3 items-end justify-end">
-                    <div>
-                      <div className="bg-primary text-black rounded-2xl rounded-br-sm px-4 py-3 max-w-md">
-                        <p className="text-sm font-medium leading-relaxed">{msg.text}</p>
-                      </div>
-                      <div className="flex items-center justify-end gap-1.5 mt-1.5 mr-2">
-                        <span className="text-[10px] font-medium text-text-secondary/70">{msg.timestamp}</span>
-                        {msg.read && <span className="text-primary text-xs">✓✓</span>}
-                      </div>
-                    </div>
+              {/* Typing indicator */}
+              {currentTypingUsers.length > 0 && (
+                <div className="flex gap-3 items-end">
+                  <div className="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-[10px] font-bold text-text-secondary">
+                    {getInitials(
+                      findUser(currentTypingUsers[0])?.fullName
+                    )}
                   </div>
-                );
-              })}
+                  <div className="bg-surface-container-low border border-surface-container-high rounded-2xl rounded-bl-sm px-4 py-3 flex gap-1.5">
+                    <div
+                      className="w-1.5 h-1.5 bg-text-secondary/60 rounded-full animate-bounce"
+                      style={{ animationDelay: "0ms" }}
+                    />
+                    <div
+                      className="w-1.5 h-1.5 bg-text-secondary/60 rounded-full animate-bounce"
+                      style={{ animationDelay: "150ms" }}
+                    />
+                    <div
+                      className="w-1.5 h-1.5 bg-text-secondary/60 rounded-full animate-bounce"
+                      style={{ animationDelay: "300ms" }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              <div ref={messagesEndRef} />
             </div>
 
-            {/* Input Area */}
-            <div className="bg-surface border-t border-surface-container-high p-4 px-6 flex items-end gap-3 sticky bottom-0">
-              <button className="p-2.5 text-text-secondary hover:text-primary hover:bg-primary/10 rounded-full transition-colors flex-shrink-0 mb-0.5">
-                <Plus size={22} />
-              </button>
-
+            {/* ── Input Area ──────────────────────────────────────────── */}
+            <div className="bg-surface border-t border-surface-container-high p-4 px-6 flex items-end gap-3 flex-shrink-0">
               <div className="flex-1 bg-surface-container-low border border-surface-container-high rounded-2xl flex items-end">
                 <textarea
                   value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
+                  onChange={handleInputChange}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && !e.shiftKey) {
+                    if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
-                      handleSendMessage();
+                      handleSend();
                     }
                   }}
                   placeholder="Type a message..."
@@ -326,13 +689,31 @@ function Chat() {
               </div>
 
               <button
-                onClick={handleSendMessage}
-                className="bg-primary text-black p-3.5 rounded-full hover:bg-primary-hover transition-colors flex-shrink-0 shadow-lg shadow-primary/20 mb-0.5"
+                onClick={handleSend}
+                disabled={!messageInput.trim()}
+                className="bg-primary text-white p-3.5 rounded-full hover:bg-primary-hover transition-colors flex-shrink-0 shadow-lg shadow-primary/20 mb-0.5 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <Send size={18} className="translate-x-[-1px] translate-y-[1px]" />
+                <Send
+                  size={18}
+                  className="translate-x-[-1px] translate-y-[1px]"
+                />
               </button>
             </div>
           </>
+        ) : (
+          /* ── No conversation selected ────────────────────────────────── */
+          <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+            <div className="w-20 h-20 rounded-2xl bg-surface-container flex items-center justify-center mb-5">
+              <MessageSquare size={32} className="text-text-secondary/30" />
+            </div>
+            <h3 className="text-lg font-bold text-on-surface mb-2 font-heading">
+              Your Messages
+            </h3>
+            <p className="text-sm text-text-secondary max-w-xs">
+              Select a project group or teammate from the sidebar to start
+              chatting.
+            </p>
+          </div>
         )}
       </main>
     </div>

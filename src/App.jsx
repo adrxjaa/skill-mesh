@@ -18,6 +18,7 @@ import Projects from "./pages/Projects";
 import { FeedProvider } from "./context/FeedContext";
 import { ProfileProvider } from "./context/ProfileContext";
 import { ProjectProvider } from "./context/ProjectContext";
+import { ChatProvider } from "./context/ChatContext";
 
 function App() {
   function AppContent() {
@@ -68,7 +69,9 @@ function App() {
       <FeedProvider>
         <ProfileProvider>
           <ProjectProvider>
-            <AppContent />
+            <ChatProvider>
+              <AppContent />
+            </ChatProvider>
           </ProjectProvider>
         </ProfileProvider>
       </FeedProvider>
